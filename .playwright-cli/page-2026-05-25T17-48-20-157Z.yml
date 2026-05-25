@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - img "Logo" [ref=e5]
+        - generic [ref=e6]:
+          - button "Home" [ref=e7] [cursor=pointer]: Home
+          - button "Mentorship" [ref=e8] [cursor=pointer]:
+            - text: Mentorship
+            - img [ref=e9]
+          - button "Programmes" [ref=e11] [cursor=pointer]:
+            - text: Programmes
+            - img [ref=e12]
+          - button "Events" [ref=e14] [cursor=pointer]: Events
+          - button "Blog" [ref=e15] [cursor=pointer]: Blog
+          - button "About Us" [ref=e16] [cursor=pointer]:
+            - text: About Us
+            - img [ref=e17]
+    - heading "Mentorship FAQ" [level=1] [ref=e21]
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "Mentors and Mentees FAQ" [level=2] [ref=e24]
+        - button "How do I join the mentorship program?" [ref=e26] [cursor=pointer]:
+          - paragraph [ref=e28]: How do I join the mentorship program?
+          - img [ref=e30]
+        - button "How long does the mentorship program last?" [ref=e33] [cursor=pointer]:
+          - paragraph [ref=e35]: How long does the mentorship program last?
+          - img [ref=e37]
+        - button "How often do mentors and mentees meet?" [ref=e40] [cursor=pointer]:
+          - paragraph [ref=e42]: How often do mentors and mentees meet?
+          - img [ref=e44]
+        - button "Do I need to be based in London to be a mentor or mentee?" [ref=e47] [cursor=pointer]:
+          - paragraph [ref=e49]: Do I need to be based in London to be a mentor or mentee?
+          - img [ref=e51]
+        - button "Is this Mentorship Programme available only for remote participation?" [ref=e54] [cursor=pointer]:
+          - paragraph [ref=e56]: Is this Mentorship Programme available only for remote participation?
+          - img [ref=e58]
+        - button "What are the benefits of participating in a mentorship programme?" [ref=e61] [cursor=pointer]:
+          - paragraph [ref=e63]: What are the benefits of participating in a mentorship programme?
+          - img [ref=e65]
+        - button "What are the goals and objectives of the mentorship programme?" [ref=e68] [cursor=pointer]:
+          - paragraph [ref=e70]: What are the goals and objectives of the mentorship programme?
+          - img [ref=e72]
+        - button "What do ad-hoc mentorship sessions mean?" [ref=e75] [cursor=pointer]:
+          - paragraph [ref=e77]: What do ad-hoc mentorship sessions mean?
+          - img [ref=e79]
+        - button "What is Notion?" [ref=e82] [cursor=pointer]:
+          - paragraph [ref=e84]: What is Notion?
+          - img [ref=e86]
+        - button "What is the time commitment for participating in this programme?" [ref=e89] [cursor=pointer]:
+          - paragraph [ref=e91]: What is the time commitment for participating in this programme?
+          - img [ref=e93]
+        - button "What kind of support and resources will be provided to mentors and mentees?" [ref=e96] [cursor=pointer]:
+          - paragraph [ref=e98]: What kind of support and resources will be provided to mentors and mentees?
+          - img [ref=e100]
+        - button "Who can participate in a mentorship programme?" [ref=e103] [cursor=pointer]:
+          - paragraph [ref=e105]: Who can participate in a mentorship programme?
+          - img [ref=e107]
+      - generic [ref=e109]:
+        - heading "Mentors FAQ" [level=2] [ref=e110]
+        - button "What is expected of me as a mentor?" [ref=e112] [cursor=pointer]:
+          - paragraph [ref=e114]: What is expected of me as a mentor?
+          - img [ref=e116]
+        - button "I haven't mentored before. Could I sign up?" [ref=e119] [cursor=pointer]:
+          - paragraph [ref=e121]: I haven't mentored before. Could I sign up?
+          - img [ref=e123]
+        - button "I do not identify as a woman, can I participate as a mentor?" [ref=e126] [cursor=pointer]:
+          - paragraph [ref=e128]: I do not identify as a woman, can I participate as a mentor?
+          - img [ref=e130]
+      - generic [ref=e132]:
+        - heading "Mentees FAQ" [level=2] [ref=e133]
+        - button "How can I choose my mentor?" [ref=e135] [cursor=pointer]:
+          - paragraph [ref=e137]: How can I choose my mentor?
+          - img [ref=e139]
+        - button "What are the expectations for mentees in the mentorship programme?" [ref=e142] [cursor=pointer]:
+          - paragraph [ref=e144]: What are the expectations for mentees in the mentorship programme?
+          - img [ref=e146]
+        - button "When do I need a mentor?" [ref=e149] [cursor=pointer]:
+          - paragraph [ref=e151]: When do I need a mentor?
+          - img [ref=e153]
+  - alert [ref=e155]

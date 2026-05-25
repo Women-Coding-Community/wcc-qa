@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - img "Logo" [ref=e5]
+        - generic [ref=e6]:
+          - button "Home" [ref=e7] [cursor=pointer]: Home
+          - button "Mentorship" [ref=e8] [cursor=pointer]:
+            - text: Mentorship
+            - img [ref=e9]
+          - button "Programmes" [ref=e11] [cursor=pointer]:
+            - text: Programmes
+            - img [ref=e12]
+          - button "Events" [ref=e14] [cursor=pointer]: Events
+          - button "Blog" [ref=e15] [cursor=pointer]: Blog
+          - button "About Us" [ref=e16] [cursor=pointer]:
+            - text: About Us
+            - img [ref=e17]
+    - navigation "breadcrumb" [ref=e20]:
+      - list [ref=e21]:
+        - listitem [ref=e22]:
+          - link "Home" [ref=e23] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e24]: /
+        - listitem [ref=e25]:
+          - link "Mentorship" [ref=e26] [cursor=pointer]:
+            - /url: /mentorship
+        - listitem [ref=e27]: /
+        - listitem [ref=e28]:
+          - paragraph [ref=e29]: Ad Hoc Timeline
+    - heading "Ad-Hoc Mentorship Timeline" [level=2] [ref=e32]
+    - list [ref=e34]:
+      - listitem [ref=e35]:
+        - generic [ref=e42]:
+          - heading [level=5]
+          - heading "Application period" [level=4] [ref=e43]
+          - heading "Every month (from June to November), interested mentees will have the opportunity to apply to the one-time mentorship session program. The application opens at the beginning of each month and it is possible to apply for a mentor during the first 10 days of each month." [level=6] [ref=e44]
+      - listitem [ref=e45]:
+        - generic [ref=e52]:
+          - heading [level=5]
+          - heading "Mentee selection" [level=4] [ref=e53]
+          - heading "Once the application period has ended, the Mentorship Programme Team will review the applications and select the mentees who will participate in the program for the month." [level=6] [ref=e54]
+      - listitem [ref=e55]:
+        - generic [ref=e62]:
+          - heading [level=5]
+          - heading "Mentor notification" [level=4] [ref=e63]
+          - heading "The Mentorship Programme Team will send a list of selected mentees to the mentors, along with their profiles and information about their goals and expectations for the mentorship." [level=6] [ref=e64]
+      - listitem [ref=e65]:
+        - generic [ref=e72]:
+          - heading [level=5]
+          - heading "Scheduling sessions" [level=4] [ref=e73]
+          - heading "The Mentorship Programme Team will share the mentor's Calendly link with the mentees if the mentor has provided it to the team. The team will also communicate this information via email to both the mentor and the mentee." [level=6] [ref=e74]
+      - listitem [ref=e75]:
+        - generic [ref=e82]:
+          - heading [level=5]
+          - heading "Session preparation" [level=4] [ref=e83]
+          - heading "Before each session, mentors and mentees should prepare and plan for the meeting, setting clear goals and objectives for the session." [level=6] [ref=e84]
+      - listitem [ref=e85]:
+        - generic [ref=e92]:
+          - heading [level=5]
+          - heading "Feedback" [level=4] [ref=e93]
+          - heading "After one-time session mentors will ask the mentee's feedback on the session and the program itself." [level=6] [ref=e94]
+      - listitem [ref=e95]:
+        - generic [ref=e101]:
+          - heading [level=5]
+          - heading "Program evaluation" [level=4] [ref=e102]
+          - heading "Both mentor and mentee are responsible for informing the Mentorship Programme Team about the session taking place and providing feedback afterwards. At the end of the year, the Mentorship Programme Team will collect feedback from mentors and evaluate feedback from mentees to identify areas for improvement and make any necessary adjustments." [level=6] [ref=e103]
+    - separator [ref=e104]
+    - generic [ref=e105]:
+      - generic [ref=e106]:
+        - img "Woman Coding Community" [ref=e107]
+        - paragraph [ref=e108]:
+          - text: Women Coding Community is a not-for-profit organisation.
+          - text: © 2026 Women Coding Community
+      - generic [ref=e109]:
+        - paragraph [ref=e110]: Follow Us
+        - paragraph [ref=e111]: Join us on social media and stay tuned.
+        - generic [ref=e112]:
+          - link [ref=e113] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/womencodingcommunity
+            - img [ref=e115]
+          - link [ref=e117] [cursor=pointer]:
+            - /url: https://github.com/WomenCodingCommunity
+            - img [ref=e119]
+          - link [ref=e121] [cursor=pointer]:
+            - /url: https://www.instagram.com/women_coding_community
+            - img [ref=e123]
+          - link [ref=e125] [cursor=pointer]:
+            - /url: mail:london@womencodingcommunity.com
+            - img [ref=e127]
+          - link [ref=e129] [cursor=pointer]:
+            - /url: https://join.slack.com/t/womencodingcommunity/shared_invite/zt-2hpjwpx7l-rgceYBIWp6pCiwc0hVsX8A
+            - img [ref=e131]
+        - paragraph [ref=e133]:
+          - text: Experiencing Technical Issues?
+          - link "Send us a report" [ref=e134] [cursor=pointer]:
+            - /url: https://github.com/WomenCodingCommunity/WomenCodingCommunity.github.io/issues/new?template=bug_report.md&title=bug%20title
+  - alert [ref=e135]

@@ -1,0 +1,55 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - img "Logo" [ref=e5]
+        - generic [ref=e6]:
+          - button "Home" [ref=e7] [cursor=pointer]: Home
+          - button "Mentorship" [ref=e8] [cursor=pointer]:
+            - text: Mentorship
+            - img [ref=e9]
+          - button "Programmes" [ref=e11] [cursor=pointer]:
+            - text: Programmes
+            - img [ref=e12]
+          - button "Events" [ref=e14] [cursor=pointer]: Events
+          - button "Blog" [ref=e15] [cursor=pointer]: Blog
+          - button "About Us" [ref=e16] [cursor=pointer]:
+            - text: About Us
+            - img [ref=e17]
+    - navigation "breadcrumb" [ref=e20]:
+      - list [ref=e21]:
+        - listitem [ref=e22]:
+          - link "Home" [ref=e23] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e24]: /
+        - listitem [ref=e25]:
+          - link "Mentorship" [ref=e26] [cursor=pointer]:
+            - /url: /mentorship
+        - listitem [ref=e27]: /
+        - listitem [ref=e28]:
+          - paragraph [ref=e29]: Code Of Conduct
+    - generic [ref=e30]:
+      - heading "Mentorship Code of Conduct" [level=2] [ref=e32]
+      - generic [ref=e33]:
+        - heading "Code of conduct for mentees" [level=3] [ref=e34]
+        - list [ref=e35]:
+          - listitem [ref=e36]: Women Coding Community is an inclusive community, dedicated to providing an empowering experience for everyone who participates in or supports our community, regardless of gender, gender identity and expression, sexual orientation, ability, physical appearance, body size, race, ethnicity, age, religion, socioeconomic status, caste, creed, political affiliation, or preferred programming language(s).
+          - listitem [ref=e37]: Cancel or reschedule appointments with a minimum of 24 hours prior notice by providing a reason using preferable channel (email, slack, or anything else you both chose as the channel of communication) to the mentor.
+          - listitem [ref=e38]: "No-shows are unacceptable for mentors and mentees. No-shows should be informed to the Mentorship Programme Team by Slack , channel #mentorship. The Mentorship Programme Team will evaluate case by case, and this is one of the possible actions that could result in exclusion from the current and future mentorship program cycles."
+        - generic [ref=e39]:
+          - paragraph
+          - button "Show more" [ref=e40] [cursor=pointer]:
+            - img [ref=e42]
+            - text: Show more
+      - generic [ref=e44]:
+        - heading "Code of conduct for mentors" [level=3] [ref=e45]
+        - list [ref=e46]:
+          - listitem [ref=e47]: Women Coding Community is an inclusive community, dedicated to providing an empowering experience for everyone who participates in or supports our community, regardless of gender, gender identity and expression, sexual orientation, ability, physical appearance, body size, race, ethnicity, age, religion, socioeconomic status, caste, creed, political affiliation, or preferred programming language(s).
+          - listitem [ref=e48]: Cancel or reschedule appointments with a minimum of 24 hours prior notice by providing a reason by preferable channel (email, slack or anything else you both choose as the channel of communication) to the mentee.
+          - listitem [ref=e49]: "No-shows are unacceptable for mentors and mentees. No-shows should be informed to the Mentorship Programme Team by Slack channel #mentorship. The Mentorship Programme Team will evaluate case by case and this is one of the possible actions that could result in exclusion from the current and future mentorship program cycles."
+        - generic [ref=e50]:
+          - paragraph
+          - button "Show more" [ref=e51] [cursor=pointer]:
+            - img [ref=e53]
+            - text: Show more
+  - alert [ref=e55]

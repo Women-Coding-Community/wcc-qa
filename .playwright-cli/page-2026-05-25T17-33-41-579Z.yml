@@ -1,0 +1,135 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - img [ref=e117]
+        - generic [ref=e6]:
+          - button [ref=e118] [cursor=pointer]: Home
+          - button [ref=e119] [cursor=pointer]:
+            - text: Mentorship
+            - img [ref=e9]
+          - button [ref=e120] [cursor=pointer]:
+            - text: Programmes
+            - img [ref=e12]
+          - button [ref=e121] [cursor=pointer]: Events
+          - button [ref=e122] [cursor=pointer]: Blog
+          - button [ref=e123] [cursor=pointer]:
+            - text: About Us
+            - img [ref=e17]
+    - navigation [ref=e124]:
+      - list [ref=e21]:
+        - listitem [ref=e22]:
+          - link [ref=e125] [cursor=pointer]:
+            - /url: /
+            - text: Home
+        - listitem [ref=e24]: /
+        - listitem [ref=e25]:
+          - paragraph [ref=e26]: Mentorship
+    - heading [level=2] [ref=e126]: Mentorship Programme
+    - paragraph [ref=e31]: Mentorship is a fantastic way to get support for your personal growth and career development. Mentorship relationships can be rewarding to both people, personally and professionally. It's an opportunity to develop communication skills, expand your viewpoints, and consider new ways of approaching situations. And both partners can advance their careers in the process.
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - heading [level=4] [ref=e127]: Become a mentor
+        - separator [ref=e35]
+        - heading [level=5] [ref=e128]: "You should become a mentor if you:"
+        - list [ref=e37]:
+          - listitem [ref=e38]:
+            - heading [level=5] [ref=e129]: Want to extend your professional network
+          - listitem [ref=e40]:
+            - heading [level=5] [ref=e130]: Want to contribute to the community
+          - listitem [ref=e42]:
+            - heading [level=5] [ref=e131]: You are ready to share expertise
+          - listitem [ref=e44]:
+            - heading [level=5] [ref=e132]: You want to get a new perspective and learn from your mentees
+        - link [ref=e133] [cursor=pointer]:
+          - /url: /mentorship/mentor-registration
+          - text: Join as a mentor
+      - generic [ref=e47]:
+        - heading [level=4] [ref=e134]: Become a mentee
+        - separator [ref=e49]
+        - heading [level=5] [ref=e135]: "You should become a mentee if you:"
+        - list [ref=e51]:
+          - listitem [ref=e52]:
+            - heading [level=5] [ref=e136]: Want to start career in software engineering
+          - listitem [ref=e54]:
+            - heading [level=5] [ref=e137]: Want to find a better job
+          - listitem [ref=e56]:
+            - heading [level=5] [ref=e138]: Want to be promoted at work
+          - listitem [ref=e58]:
+            - heading [level=5] [ref=e139]: Want to apply for a leadership position
+          - listitem [ref=e60]:
+            - heading [level=5] [ref=e140]: Need support in advancing your career
+        - link [ref=e141] [cursor=pointer]:
+          - /url: /mentorship/mentors
+          - text: Check our mentors
+    - generic [ref=e64]:
+      - heading [level=3] [ref=e142]: What do participants think about our Mentorship Programme?
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - img [ref=e68]
+          - paragraph [ref=e70]:
+            - text: My session with my mentor exceeded my expectations. She's calm, caring, and incredibly knowledgeable. She offered valuable guidance not only on my career but also on life in general. My mentor truly embodies a growth mindset. I highly recommend her to any mentee seeking direction delivered with both...
+            - button [ref=e143] [cursor=pointer]: Show more
+          - heading [level=6] [ref=e144]: Busra, Mentee 2025
+        - generic [ref=e73]:
+          - img [ref=e74]
+          - paragraph [ref=e76]:
+            - text: My mentor really took the time to comprehend my mental barriers and gave personalised structure advice to move past them. I appreciated the mentors vulnerability in explaining similar scenarios they had been in to give me a sense of guidance and belonging. Their kindness and warmth during the sessio...
+            - button [ref=e145] [cursor=pointer]: Show more
+          - heading [level=6] [ref=e146]: Zayna, Mentee 2025
+        - generic [ref=e79]:
+          - img [ref=e80]
+          - paragraph [ref=e82]: Just the simple act of presenting my profile and explaining my difficulties to a professional helped me structure the ideas and information in my head, and that alone was a big help. My mentor was caring, involved, and encouraging.
+          - heading [level=6] [ref=e147]: Anonymous, Mentee 2025
+      - button [ref=e148] [cursor=pointer]: + Show more
+    - separator [ref=e85]
+    - generic [ref=e86]:
+      - generic [ref=e87]:
+        - img [ref=e149]
+        - paragraph [ref=e89]: Women Coding Community is a not-for-profit organisation. © 2026 Women Coding Community
+      - generic [ref=e90]:
+        - paragraph [ref=e91]: Follow Us
+        - paragraph [ref=e92]: Join us on social media and stay tuned.
+        - generic [ref=e93]:
+          - link [ref=e94] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/womencodingcommunity
+            - img [ref=e96]
+          - link [ref=e98] [cursor=pointer]:
+            - /url: https://github.com/WomenCodingCommunity
+            - img [ref=e100]
+          - link [ref=e102] [cursor=pointer]:
+            - /url: https://www.instagram.com/women_coding_community
+            - img [ref=e104]
+          - link [ref=e106] [cursor=pointer]:
+            - /url: mail:london@womencodingcommunity.com
+            - img [ref=e108]
+          - link [ref=e110] [cursor=pointer]:
+            - /url: https://join.slack.com/t/womencodingcommunity/shared_invite/zt-2hpjwpx7l-rgceYBIWp6pCiwc0hVsX8A
+            - img [ref=e112]
+        - paragraph [ref=e114]:
+          - text: Experiencing Technical Issues?
+          - link [ref=e150] [cursor=pointer]:
+            - /url: https://github.com/WomenCodingCommunity/WomenCodingCommunity.github.io/issues/new?template=bug_report.md&title=bug%20title
+            - text: Send us a report
+  - alert [ref=e116]
+  - menu [ref=e153]:
+    - menuitem "Overview" [active] [ref=e154] [cursor=pointer]:
+      - paragraph [ref=e155]: Overview
+    - menuitem "Mentors" [ref=e156] [cursor=pointer]:
+      - paragraph [ref=e157]: Mentors
+    - menuitem "Study Groups" [ref=e158] [cursor=pointer]:
+      - paragraph [ref=e159]: Study Groups
+    - menuitem "Mentor Registration" [ref=e160] [cursor=pointer]:
+      - paragraph [ref=e161]: Mentor Registration
+    - menuitem "Mentee Registration" [ref=e162] [cursor=pointer]:
+      - paragraph [ref=e163]: Mentee Registration
+    - menuitem "Resources" [ref=e164] [cursor=pointer]:
+      - paragraph [ref=e165]: Resources
+    - menuitem "Code of Conduct" [ref=e166] [cursor=pointer]:
+      - paragraph [ref=e167]: Code of Conduct
+    - menuitem "FAQs" [ref=e168] [cursor=pointer]:
+      - paragraph [ref=e169]: FAQs
+    - menuitem "Long-Term Timeline" [ref=e170] [cursor=pointer]:
+      - paragraph [ref=e171]: Long-Term Timeline
+    - menuitem "Ad-Hoc Timeline" [ref=e172] [cursor=pointer]:
+      - paragraph [ref=e173]: Ad-Hoc Timeline

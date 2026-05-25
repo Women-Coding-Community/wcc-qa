@@ -1,0 +1,93 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - img "Logo" [ref=e5]
+        - generic [ref=e6]:
+          - button "Home" [ref=e7] [cursor=pointer]: Home
+          - button "Mentorship" [ref=e8] [cursor=pointer]:
+            - text: Mentorship
+            - img [ref=e9]
+          - button "Programmes" [ref=e11] [cursor=pointer]:
+            - text: Programmes
+            - img [ref=e12]
+          - button "Events" [ref=e14] [cursor=pointer]: Events
+          - button "Blog" [ref=e15] [cursor=pointer]: Blog
+          - button "About Us" [ref=e16] [cursor=pointer]:
+            - text: About Us
+            - img [ref=e17]
+    - navigation "breadcrumb" [ref=e20]:
+      - list [ref=e21]:
+        - listitem [ref=e22]:
+          - link "Home" [ref=e23] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e24]: /
+        - listitem [ref=e25]:
+          - link "Mentorship" [ref=e26] [cursor=pointer]:
+            - /url: /mentorship
+        - listitem [ref=e27]: /
+        - listitem [ref=e28]:
+          - paragraph [ref=e29]: Resources
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - heading "Mentorship Resources" [level=2] [ref=e34]
+        - paragraph [ref=e36]: Whether you’re a mentee looking to navigate your journey, a mentor aiming to provide the best guidance, or a seasoned mentor seeking quick tips, we have the tools you need. Explore our guides for insightful mentorship advice and strategies.
+        - generic [ref=e38]:
+          - generic [ref=e40]:
+            - img "Mentee’s Guide" [ref=e41]
+            - generic [ref=e42]:
+              - heading "Mentee’s Guide" [level=6] [ref=e43]
+              - paragraph
+            - link "View Guide" [ref=e45] [cursor=pointer]:
+              - /url: "#"
+              - text: View Guide
+              - img [ref=e47]
+          - generic [ref=e50]:
+            - img "Mentor’s Pocketbook" [ref=e51]
+            - generic [ref=e52]:
+              - heading "Mentor’s Pocketbook" [level=6] [ref=e53]
+              - paragraph
+            - link "View Pocketbook" [ref=e55] [cursor=pointer]:
+              - /url: "#"
+              - text: View Pocketbook
+              - img [ref=e57]
+          - generic [ref=e60]:
+            - img "Mentor’s Guide" [ref=e61]
+            - generic [ref=e62]:
+              - heading "Mentor’s Guide" [level=6] [ref=e63]
+              - paragraph
+            - link "View Guide" [ref=e65] [cursor=pointer]:
+              - /url: "#"
+              - text: View Guide
+              - img [ref=e67]
+      - separator [ref=e69]
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - img "Woman Coding Community" [ref=e72]
+          - paragraph [ref=e73]:
+            - text: Women Coding Community is a not-for-profit organisation.
+            - text: © 2026 Women Coding Community
+        - generic [ref=e74]:
+          - paragraph [ref=e75]: Follow Us
+          - paragraph [ref=e76]: Join us on social media and stay tuned.
+          - generic [ref=e77]:
+            - link [ref=e78] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/womencodingcommunity
+              - img [ref=e80]
+            - link [ref=e82] [cursor=pointer]:
+              - /url: https://github.com/WomenCodingCommunity
+              - img [ref=e84]
+            - link [ref=e86] [cursor=pointer]:
+              - /url: https://www.instagram.com/women_coding_community
+              - img [ref=e88]
+            - link [ref=e90] [cursor=pointer]:
+              - /url: mailto:london@womencodingcommunity.com
+              - img [ref=e92]
+            - link [ref=e94] [cursor=pointer]:
+              - /url: https://join.slack.com/t/womencodingcommunity/shared_invite/zt-2hpjwpx7l-rgceYBIWp6pCiwc0hVsX8A
+              - img [ref=e96]
+          - paragraph [ref=e98]:
+            - text: Experiencing Technical Issues?
+            - link "Send us a report" [ref=e99] [cursor=pointer]:
+              - /url: https://github.com/WomenCodingCommunity/WomenCodingCommunity.github.io/issues/new?template=bug_report.md&title=bug%20title
+  - alert [ref=e100]

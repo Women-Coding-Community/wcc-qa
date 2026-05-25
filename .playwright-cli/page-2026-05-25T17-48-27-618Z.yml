@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - img "Logo" [ref=e5]
+        - generic [ref=e6]:
+          - button "Home" [ref=e7] [cursor=pointer]: Home
+          - button "Mentorship" [ref=e8] [cursor=pointer]:
+            - text: Mentorship
+            - img [ref=e9]
+          - button "Programmes" [ref=e11] [cursor=pointer]:
+            - text: Programmes
+            - img [ref=e12]
+          - button "Events" [ref=e14] [cursor=pointer]: Events
+          - button "Blog" [ref=e15] [cursor=pointer]: Blog
+          - button "About Us" [ref=e16] [cursor=pointer]:
+            - text: About Us
+            - img [ref=e17]
+    - navigation "breadcrumb" [ref=e20]:
+      - list [ref=e21]:
+        - listitem [ref=e22]:
+          - link "Home" [ref=e23] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e24]: /
+        - listitem [ref=e25]:
+          - link "Mentorship" [ref=e26] [cursor=pointer]:
+            - /url: /mentorship
+        - listitem [ref=e27]: /
+        - listitem [ref=e28]:
+          - paragraph [ref=e29]: Long Term Timeline
+    - heading "Long-Term Mentorship Timeline" [level=2] [ref=e32]
+    - list [ref=e34]:
+      - listitem [ref=e35]:
+        - generic [ref=e42]:
+          - heading "Continuous" [level=5] [ref=e43]
+          - heading "Registration for mentors" [level=4] [ref=e44]
+          - heading "Mentors can apply for Mentorship throughout the year. Once a profile has been approved and published on the website, the mentor will receive a confirmation email." [level=6] [ref=e45]
+      - listitem [ref=e46]:
+        - generic [ref=e53]:
+          - heading "March 2026" [level=5] [ref=e54]
+          - heading "Registration for mentees is open" [level=4] [ref=e55]
+          - heading "Mentees will have the opportunity to choose a mentor and apply for a long-term mentorship relationship until the end of March." [level=6] [ref=e56]
+      - listitem [ref=e57]:
+        - generic [ref=e64]:
+          - heading "April 2026" [level=5] [ref=e65]
+          - heading "WCC annual mentorship program launch" [level=4] [ref=e66]
+          - heading "This discussion will cover topics such as the specific challenges that women in technology often encounter and how mentorship can provide support and guidance." [level=6] [ref=e67]
+      - listitem [ref=e68]:
+        - generic [ref=e75]:
+          - heading "April 2026" [level=5] [ref=e76]
+          - heading "Introduction emails" [level=4] [ref=e77]
+          - heading "Once the list of matched mentors and mentees is complete, all participants will receive an introduction email containing the next steps." [level=6] [ref=e78]
+      - listitem [ref=e79]:
+        - generic [ref=e86]:
+          - heading "April - September, 2026" [level=5] [ref=e87]
+          - heading "Regular meetings" [level=4] [ref=e88]
+          - heading "Throughout the programme, mentors and mentees will schedule regular meetings to discuss progress and share advice and feedback. The frequency of these meetings will depend on the preferences of the mentor and mentee, however, they will typically occur every 1-2 weeks." [level=6] [ref=e89]
+      - listitem [ref=e90]:
+        - generic [ref=e97]:
+          - heading "June - July, 2026" [level=5] [ref=e98]
+          - heading "Programme check-ins" [level=4] [ref=e99]
+          - heading "Mentors and mentees will be invited to a mentorship check-in meeting twice during the cycle to assess progress and collect feedback." [level=6] [ref=e100]
+      - listitem [ref=e101]:
+        - generic [ref=e107]:
+          - heading "End of the Programme" [level=5] [ref=e108]
+          - heading "End of the Programme" [level=4] [ref=e109]
+          - heading "The mentor and mentee will agree on their final meeting to conclude their sessions. The Mentorship Programme Team will then hold a meeting for all mentors and mentees to wrap up the mentorship programme and discuss wins, progress, and outcomes of the programme." [level=6] [ref=e110]
+    - separator [ref=e111]
+    - generic [ref=e112]:
+      - generic [ref=e113]:
+        - img "Woman Coding Community" [ref=e114]
+        - paragraph [ref=e115]:
+          - text: Women Coding Community is a not-for-profit organisation.
+          - text: © 2026 Women Coding Community
+      - generic [ref=e116]:
+        - paragraph [ref=e117]: Follow Us
+        - paragraph [ref=e118]: Join us on social media and stay tuned.
+        - generic [ref=e119]:
+          - link [ref=e120] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/womencodingcommunity
+            - img [ref=e122]
+          - link [ref=e124] [cursor=pointer]:
+            - /url: https://github.com/WomenCodingCommunity
+            - img [ref=e126]
+          - link [ref=e128] [cursor=pointer]:
+            - /url: https://www.instagram.com/women_coding_community
+            - img [ref=e130]
+          - link [ref=e132] [cursor=pointer]:
+            - /url: mail:london@womencodingcommunity.com
+            - img [ref=e134]
+          - link [ref=e136] [cursor=pointer]:
+            - /url: https://join.slack.com/t/womencodingcommunity/shared_invite/zt-2hpjwpx7l-rgceYBIWp6pCiwc0hVsX8A
+            - img [ref=e138]
+        - paragraph [ref=e140]:
+          - text: Experiencing Technical Issues?
+          - link "Send us a report" [ref=e141] [cursor=pointer]:
+            - /url: https://github.com/WomenCodingCommunity/WomenCodingCommunity.github.io/issues/new?template=bug_report.md&title=bug%20title
+  - alert [ref=e142]
