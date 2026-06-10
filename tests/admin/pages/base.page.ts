@@ -1,14 +1,13 @@
-import type { Page } from "@playwright/test"
+import type { Page } from "@playwright/test";
 
 export class BasePage {
-  readonly page: Page
+	readonly page: Page;
 
-  constructor(page: Page) {
-    this.page = page
-  }
+	constructor(page: Page) {
+		this.page = page;
+	}
 
-  async navigateToURL(path: string): Promise<void> {
-    await this.page.goto(path);
-  }
-
+	async navigateToURL(path: string): Promise<void> {
+		await this.page.goto(path);
+	}
 }
