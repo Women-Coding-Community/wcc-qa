@@ -2,20 +2,6 @@
 
 Playwright + TypeScript test automation for the WCC platform. The suite is type-safe end to end: requests are built from Faker factories, responses are validated at runtime with Zod, and API calls go through a small client/service layer.
 
-> 🤖 **Contributing with AI tools?** Read [CLAUDE.md](CLAUDE.md) first — it holds the mandatory rules and conventions this project enforces.
-
----
-
-## Tech Stack
-
-| Tool | Purpose |
-| --- | --- |
-| [Playwright Test](https://playwright.dev) | Test runner + API/browser drivers |
-| TypeScript | Type safety (`strict`, no `any`) |
-| [Zod](https://zod.dev) | Runtime response-schema validation |
-| [Faker](https://fakerjs.dev) | Dynamic test data |
-| dotenv | Environment configuration |
-
 ---
 
 ## Prerequisites
@@ -35,19 +21,22 @@ npm install
 npx playwright install
 
 # 3. Configure environment (see below)
-#    Create tests/api/.env with the variables in the next section
+#    Copy tests/.env.example to tests/.env and fill in the values
 ```
 
 ### Environment variables
 
-API tests read configuration from **`tests/api/.env`**. Create it with:
+Tests read configuration from **`tests/.env`** (copy [`tests/.env.example`](tests/.env.example)):
 
 ```dotenv
 # Target API
 API_HOST=https://your-api-host
 API_KEY=your-x-api-key
 
-# Role credentials (used by the per-role fixtures)
+# Admin/UI base URL (optional — defaults to http://localhost:3000)
+ADMIN_BASE_URL=
+
+# Role credentials (used by the per-role fixtures and the admin setup project)
 ADMIN_EMAIL=
 ADMIN_PASSWORD=
 
@@ -94,7 +83,7 @@ npx playwright test tests/api/tests/auth/auth.flow.spec.ts --project=api
 npx playwright test --project=api --reporter=line
 ```
 
-There are two Playwright projects defined in [playwright.config.ts](playwright.config.ts): **`api`** (headless API flows) and **`admin`** (Desktop Safari UI — work in progress).
+Three Playwright projects are defined in [playwright.config.ts](playwright.config.ts): **`setup`** (logs each role in and saves its `storageState`), **`api`** (headless API flows), and **`admin`** (Desktop Safari UI; depends on `setup`). Admin tests authenticate by loading a role's saved session — e.g. `test.use({ storageState: USERS.mentor.storageState })`.
 
 ---
 
@@ -109,25 +98,30 @@ helpers/                              Test support code (outside tests/)
     services/                         Business layer — builds payloads, optional ensureSuccess, returns TypedAPIResponse<T>
   datafactory/
     constants/paths.data.ts           Endpoint path enums (AuthEndpoints, PlatformEndpoints, CmsEndpoints)
+    constants/roles.data.ts           USERS — per-role config (email, password, storageState) + Role type
     schemas/                          Zod response schemas
     mentor.factory.ts                 Faker payload factories
   fixtures/
-    fixtures.ts                       API fixtures (contexts + APIService per role)
+    common.fixtures.ts                API fixtures (contexts + APIService per role)
+    pom.fixture.ts                    UI fixtures (page objects: basePage, loginPage)
+    index.ts                          Merged test (API + POM) — import from 'helpers/fixtures'
 
 tests/
+  .env                                Env vars: API_HOST, API_KEY, ADMIN_BASE_URL, role creds (not committed)
   api/
-    .env                              API env vars (not committed)
     TEST_PLAN.md                      Flow + test-case catalogue
     tests/                            API specs ({area}/[name].flow.spec.ts)
   admin/
-    pages/                            Admin page objects (WIP)
-    tests/                            Admin specs (WIP)
+    .auth/                            Saved per-role login sessions (not committed)
+    setup.ts                          Setup project — logs each role in, saves storageState
+    pages/                            Admin page objects
+    tests/                            Admin specs
 
-playwright.config.ts                  Projects: api, admin
-tsconfig.json                         baseUrl "." → bare imports from repo root
+playwright.config.ts                  Projects: setup, api, admin (admin depends on setup)
+tsconfig.json                         paths: helpers/* and tests/* → bare imports from repo root
 ```
 
-All imports use bare specifiers resolved from the repo root (e.g. `helpers/fixtures/fixtures`, `helpers/datafactory/schemas/auth.schema`) — no relative `../../` paths and no path aliases.
+All imports use bare specifiers resolved via tsconfig `paths` (e.g. `helpers/fixtures`, `tests/admin/pages/login.page`) — no relative `../../` paths in specs.
 
 ---
 
@@ -140,12 +134,12 @@ A two-layer design, aggregated by `APIService` and exposed through role-scoped f
   - **builds its request payload in the body** (a Faker factory for pure test data, or assembled from discrete params like `login(email, password)`);
   - takes a trailing `ensureSuccess = false` flag — when `true` it calls `ensureSuccess(response)` to throw on a non-ok response;
   - **always returns `TypedAPIResponse<T>`**, so callers get a typed `.json()`.
-- **Fixtures** ([`helpers/fixtures/fixtures.ts`](helpers/fixtures/fixtures.ts)) — `authApi` (X-API-KEY only) plus `adminApi` / `leaderApi` / `mentorApi` / `mentorshipAdminApi`, and `apiForRole(role)` for permission-matrix tests. Tokens are fetched once per role per worker and cached.
+- **Fixtures** ([`helpers/fixtures/common.fixtures.ts`](helpers/fixtures/common.fixtures.ts)) — `authApi` (X-API-KEY only) plus `adminApi` / `leaderApi` / `mentorApi` / `mentorshipAdminApi`, and `apiForRole(role)` for permission-matrix tests. Tokens are fetched once per role per worker and cached. The merged `test` (API + UI page objects) is re-exported from [`helpers/fixtures`](helpers/fixtures/index.ts).
 
 ### Example
 
 ```ts
-import { test } from 'helpers/fixtures/fixtures';
+import { test } from 'helpers/fixtures';
 import { expect } from '@playwright/test';
 import { loginResponseSchema } from 'helpers/datafactory/schemas/auth.schema';
 
@@ -163,18 +157,4 @@ For negative/permission tests, omit `ensureSuccess` and assert the status on the
 ```ts
 const response = await adminApi.mentor.accept(mentorId); // no ensureSuccess
 expect(response.status()).toBe(409);
-```
-
----
-
-## Conventions (quick reference)
-
-- **Dependency injection** — get clients/services/pages from fixtures; never `new` them in a test.
-- **Dynamic data** — generate payloads with Faker factories inside the service method; never hardcode names/emails/bios.
-- **Type safety** — validate responses with `schema.parse(await response.json())`; don't assert what the schema already guarantees. No `any`.
-- **Endpoints** — always reference enums from `helpers/datafactory/constants/paths.data`; never inline raw URLs.
-- **Steps** — when a test makes 2+ API calls, wrap each in a `test.step()`.
-- **Selectors (UI)** — `getByRole()` > `getByLabel()` > `getByPlaceholder()` > `getByText()` > `getByTestId()`; no XPath, no `waitForTimeout()`.
-
-The full, authoritative rule set lives in **[CLAUDE.md](CLAUDE.md)**. The API flow/test-case catalogue is in **[tests/api/TEST_PLAN.md](tests/api/TEST_PLAN.md)**.
 ```

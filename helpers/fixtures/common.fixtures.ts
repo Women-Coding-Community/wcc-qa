@@ -1,22 +1,18 @@
 import { test as base, request as playwrightRequest, APIRequestContext } from '@playwright/test';
 import { APIService } from 'helpers/apifactory/api.service';
+import { USERS, type Role } from 'helpers/datafactory/constants/roles.data';
 
-export type Role = 'admin' | 'leader' | 'mentor' | 'mentorshipAdmin';
-
-const CREDENTIALS: Record<Role, { email?: string; password?: string }> = {
-  admin: { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD },
-  leader: { email: process.env.LEADER_EMAIL, password: process.env.LEADER_PASSWORD },
-  mentor: { email: process.env.MENTOR_EMAIL, password: process.env.MENTOR_PASSWORD },
-  mentorshipAdmin: {
-    email: process.env.MENTORSHIP_ADMIN_EMAIL,
-    password: process.env.MENTORSHIP_ADMIN_PASSWORD,
-  },
-};
+export type { Role };
 
 const BASE_URL = process.env.API_HOST ?? 'http://localhost:8080';
-const API_KEY = process.env.API_KEY;
-if (!API_KEY) {
-  throw new Error('Missing API_KEY — check tests/api/.env');
+
+/** Read API_KEY only when an API fixture actually needs it (so UI tests can load without it). */
+function getApiKey(): string {
+  const key = process.env.API_KEY;
+  if (!key) {
+    throw new Error('Missing API_KEY — check tests/.env');
+  }
+  return key;
 }
 
 type WorkerFixtures = {
@@ -54,14 +50,11 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
         const cached = cache.get(role);
         if (cached) return cached;
 
-        const { email, password } = CREDENTIALS[role];
-        if (!email || !password) {
-          throw new Error(`Missing credentials for role "${role}" — check tests/api/.env`);
-        }
+        const { email, password } = USERS[role];
 
         const ctx = await playwrightRequest.newContext({
           baseURL: BASE_URL,
-          extraHTTPHeaders: { 'X-API-KEY': API_KEY },
+          extraHTTPHeaders: { 'X-API-KEY': getApiKey() },
         });
         const api = new APIService(ctx);
         try {
@@ -83,7 +76,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   authRequest: async ({ playwright }, use) => {
     const context = await playwright.request.newContext({
       baseURL: BASE_URL,
-      extraHTTPHeaders: { 'X-API-KEY': API_KEY },
+      extraHTTPHeaders: { 'X-API-KEY': getApiKey() },
     });
     await use(context);
     await context.dispose();
@@ -97,7 +90,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       const context = await playwright.request.newContext({
         baseURL: BASE_URL,
         extraHTTPHeaders: {
-          'X-API-KEY': API_KEY,
+          'X-API-KEY': getApiKey(),
           Authorization: `Bearer ${token}`,
         },
       });
@@ -127,3 +120,4 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 });
 
 export { expect } from '@playwright/test';
+

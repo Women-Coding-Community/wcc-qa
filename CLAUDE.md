@@ -22,6 +22,7 @@ helpers/                           — Test support code (kept outside tests/)
   datafactory/
     constants/
       paths.data.ts                — All API endpoint path enums (CmsEndpoints, AuthEndpoints, PlatformEndpoints)
+      roles.data.ts                — USERS: per-role config (email, password, storageState) + Role type
     schemas/
       auth.schema.ts               — Login/auth Zod schemas
       member.dto.schema.ts         — Member DTO Zod schema
@@ -29,11 +30,13 @@ helpers/                           — Test support code (kept outside tests/)
       user.account.schema.ts       — User account Zod schema
     mentor.factory.ts              — Mentor payload factory using Faker
   fixtures/
-    fixtures.ts                    — API fixtures: contexts (authRequest, adminContext/leaderContext/mentorContext/mentorshipAdminContext, contextForRole) + APIService fixtures (authApi, adminApi/leaderApi/mentorApi/mentorshipAdminApi, apiForRole)
+    common.fixtures.ts             — API fixtures: contexts (authRequest, adminContext/leaderContext/mentorContext/mentorshipAdminContext, contextForRole) + APIService fixtures (authApi, adminApi/leaderApi/mentorApi/mentorshipAdminApi, apiForRole)
+    pom.fixture.ts                 — UI fixtures: page objects (basePage, loginPage)
+    index.ts                       — Merged test (API + POM); specs import { test } from 'helpers/fixtures'
 
 tests/
+  .env                             — Env vars: API_HOST, API_KEY, ADMIN_BASE_URL, role creds (ADMIN_EMAIL/PASSWORD, …)
   api/
-    .env                           — API env vars: ADMIN_EMAIL, ADMIN_PASSWORD, role creds, API_HOST, API_KEY
     TEST_PLAN.md                   — API flow test plan (all flows and test case IDs)
     tests/
       auth/
@@ -41,24 +44,25 @@ tests/
       platform/
         mentor.register.accept.flow.spec.ts — Mentor register & accept flow (Flow 2)
   admin/
-    pages/                         — Admin page objects (WIP)
-    tests/                         — Admin tests (WIP)
+    .auth/                         — Saved per-role login sessions (gitignored)
+    setup.ts                       — Setup project: logs each role in, saves storageState
+    pages/                         — Admin page objects (base.page, login.page)
+    tests/                         — Admin tests (login, dashboard)
 
-playwright.config.ts               — Two projects: api, admin
-tsconfig.json                      — baseUrl: ".", helpers/*, tests/* resolve from root
+playwright.config.ts               — Three projects: setup, api, admin (admin depends on setup)
+tsconfig.json                      — paths: helpers/* and tests/* resolve from root (no baseUrl)
 ```
 
 ---
 
 ## TypeScript Path Aliases
 
-All imports use bare specifiers resolved from the repo root via `baseUrl: "."` (no path aliases).
+All imports use bare specifiers resolved via tsconfig `paths` (no `baseUrl`).
 
 | Specifier                  | Resolves to                          | Used in    |
 | -------------------------- | ------------------------------------ | ---------- |
-| `helpers/apifactory/*`     | `helpers/apifactory/*` (root)        | API tests  |
-| `helpers/datafactory/*`    | `helpers/datafactory/*` (root) — includes `constants/` & `schemas/` | API tests  |
-| `helpers/fixtures/*`       | `helpers/fixtures/*` (root)          | API tests  |
+| `helpers/*`                | `helpers/*` (root)                   | API + UI tests |
+| `tests/*`                  | `tests/*` (root)                     | UI tests / fixtures |
 
 ---
 
@@ -83,8 +87,8 @@ Two-layer API design, aggregated by `APIService` (`helpers/apifactory/api.servic
 
 | Rule                        | Requirement                                                                                                                                 |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dependency Injection**    | API tests: use fixtures from `helpers/fixtures/fixtures.ts`. Admin tests: use admin fixtures (WIP). Never `new PageObject(page)` in tests. |
-| **Imports — API tests**     | `import { test } from 'helpers/fixtures/fixtures'` and `import { expect } from '@playwright/test'`. For unauthenticated calls only: `import { test as baseTest } from '@playwright/test'` |
+| **Dependency Injection**    | Use fixtures from `helpers/fixtures` (merged API + POM). API services via `authApi`/`adminApi`/…; admin page objects via `loginPage`/`basePage`. Never `new PageObject(page)` in tests (the `setup.ts` setup project is the only exception). |
+| **Imports — tests**         | `import { test } from 'helpers/fixtures'` and `import { expect } from '@playwright/test'`. For unauthenticated calls only: `import { test as baseTest } from '@playwright/test'` |
 | **Fixture selection**       | Prefer the **APIService fixtures** for service-layer calls: `authApi` (X-API-KEY only), `adminApi`/`leaderApi`/`mentorApi`/`mentorshipAdminApi` (X-API-KEY + that role's token), or `apiForRole(role)` for permission-matrix tests. Use the raw **context** fixtures (`authRequest`, `adminContext`, `leaderContext`, `mentorContext`, `mentorshipAdminContext`, `contextForRole(role)`) only for endpoints with no service method yet (mark with `// FIXME`). |
 | **Imports — Paths**         | Import endpoint enums (`AuthEndpoints`, `CmsEndpoints`, `PlatformEndpoints`) from `helpers/datafactory/constants/paths.data`. Import Zod schemas from `helpers/datafactory/schemas/`          |
 | **Dynamic Test Data**       | Always generate dynamic request payloads using Faker factories in `helpers/datafactory/`. Call the factory **inside the service method body** (e.g. `MentorService.register`), not in spec files. Never hardcode test data strings (names, emails, bios). |
@@ -130,11 +134,12 @@ Two-layer API design, aggregated by `APIService` (`helpers/apifactory/api.servic
 
 | Type             | Directory                            | Pattern               | Example                     |
 | ---------------- | ------------------------------------ | --------------------- | --------------------------- |
-| Page objects     | `tests/admin/pages/`                 | `[name].page.ts`      | `home.page.ts`              |
+| Page objects     | `tests/admin/pages/`                 | `[name].page.ts`      | `login.page.ts`             |
+| Admin tests      | `tests/admin/tests/`                 | `[name].spec.ts`      | `dashboard.page.spec.ts`    |
 | API tests        | `tests/api/tests/{area}/`            | `[name].flow.spec.ts` | `auth.flow.spec.ts`         |
 | API clients      | `helpers/apifactory/clients/`        | `[name].client.ts`    | `mentor.client.ts`          |
 | API services     | `helpers/apifactory/services/`       | `[name].service.ts`   | `mentor.service.ts`         |
-| API fixtures     | `helpers/fixtures/fixtures.ts`       | (single file)         | —                           |
+| Fixtures         | `helpers/fixtures/`                  | `common.fixtures.ts` / `pom.fixture.ts` / `index.ts` | —     |
 | API data factory | `helpers/datafactory/`               | `[name].factory.ts`   | `mentor.factory.ts`         |
 | Zod schemas      | `helpers/datafactory/schemas/`       | `[name].schema.ts`    | `auth.schema.ts`            |
 | API path enums   | `helpers/datafactory/constants/paths.data.ts` | (single file) | —                       |
@@ -177,11 +182,14 @@ npx playwright show-report
 
 ## Environment Variables
 
-| Variable         | File                    | Used by         |
-| ---------------- | ----------------------- | --------------- |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD`                       | `tests/api/.env` | api project — `adminContext`            |
-| `LEADER_EMAIL` / `LEADER_PASSWORD`                     | `tests/api/.env` | api project — `leaderContext`           |
-| `MENTOR_EMAIL` / `MENTOR_PASSWORD`                     | `tests/api/.env` | api project — `mentorContext`           |
-| `MENTORSHIP_ADMIN_EMAIL` / `MENTORSHIP_ADMIN_PASSWORD` | `tests/api/.env` | api project — `mentorshipAdminContext`  |
-| `API_HOST`       | `tests/api/.env`        | api project     |
-| `API_KEY`        | `tests/api/.env`        | api project     |
+All variables live in `tests/.env` (see `tests/.env.example`). Role credentials feed both the `USERS` model and the per-role API fixtures.
+
+| Variable         | Used by         |
+| ---------------- | --------------- |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD`                       | `USERS.admin` — `adminApi`/`adminContext` + admin setup            |
+| `LEADER_EMAIL` / `LEADER_PASSWORD`                     | `USERS.leader` — `leaderApi`/`leaderContext` + setup               |
+| `MENTOR_EMAIL` / `MENTOR_PASSWORD`                     | `USERS.mentor` — `mentorApi`/`mentorContext` + setup               |
+| `MENTORSHIP_ADMIN_EMAIL` / `MENTORSHIP_ADMIN_PASSWORD` | `USERS.mentorshipAdmin` — `mentorshipAdminApi`/…Context + setup    |
+| `API_HOST`       | api project base URL          |
+| `API_KEY`        | X-API-KEY header (all API requests) |
+| `ADMIN_BASE_URL` | admin project base URL (optional; defaults to `http://localhost:3000`) |

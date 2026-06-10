@@ -10,7 +10,8 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "paths": {
-      "helpers/*": ["./helpers/*"]
+      "helpers/*": ["./helpers/*"],
+      "tests/*": ["./tests/*"]
     },
     "types": ["node"]
   },

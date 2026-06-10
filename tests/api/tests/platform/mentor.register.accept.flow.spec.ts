@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from 'helpers/fixtures/fixtures';
+import { test } from 'helpers/fixtures/common.fixtures';
 import { CmsEndpoints } from 'helpers/datafactory/constants/paths.data';
 import { mentorResponseSchema, mentorListSchema } from 'helpers/datafactory/schemas/mentor.schema';
 
