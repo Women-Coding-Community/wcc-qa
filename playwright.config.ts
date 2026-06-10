@@ -12,9 +12,7 @@ import path from 'path';
  * adding the admin/UI project later is just a matter of dropping in its `.env`.
  * dotenv does not override already-set vars, so earlier files win on collision.
  */
-for (const envFile of ['tests/api/.env', 'tests/admin/.env']) {
-  dotenv.config({ path: path.resolve(__dirname, envFile), quiet: true });
-}
+dotenv.config({ path: path.resolve(__dirname, 'tests/.env'), quiet: true });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -43,17 +41,24 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'setup',
+      testMatch: /setup\.ts/,
+    },
+    {
       name: 'api',
       testDir: './tests/api/tests',
       use: {
         baseURL: process.env.API_HOST,
       },
     },
-
     {
       name: 'admin',
       testDir: './tests/admin/tests',
-      use: { ...devices['Desktop Safari'] },
+      use: {
+        ...devices['Desktop Safari'],
+        baseURL: process.env.ADMIN_BASE_URL ?? 'http://localhost:3000',
+      },
+      dependencies: ['setup'],
     },
 
     /* Test against mobile viewports. */
