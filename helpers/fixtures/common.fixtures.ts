@@ -43,7 +43,8 @@ type TestFixtures = {
 
 export const test = base.extend<TestFixtures, WorkerFixtures>({
 	tokenFor: [
-		async (_unused, use) => {
+		// oxlint-disable-next-line no-empty-pattern
+		async ({}, use) => {
 			const cache = new Map<Role, string>();
 
 			await use(async (role: Role) => {
