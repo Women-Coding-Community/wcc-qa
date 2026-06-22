@@ -59,10 +59,10 @@ tsconfig.json                      — paths: helpers/* and tests/* resolve from
 
 All imports use bare specifiers resolved via tsconfig `paths` (no `baseUrl`).
 
-| Specifier                  | Resolves to                          | Used in    |
-| -------------------------- | ------------------------------------ | ---------- |
-| `helpers/*`                | `helpers/*` (root)                   | API + UI tests |
-| `tests/*`                  | `tests/*` (root)                     | UI tests / fixtures |
+| Specifier   | Resolves to        | Used in             |
+| ----------- | ------------------ | ------------------- |
+| `helpers/*` | `helpers/*` (root) | API + UI tests      |
+| `tests/*`   | `tests/*` (root)   | UI tests / fixtures |
 
 ---
 
@@ -85,64 +85,64 @@ Two-layer API design, aggregated by `APIService` (`helpers/apifactory/api.servic
 
 ## MUST (Mandatory)
 
-| Rule                        | Requirement                                                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dependency Injection**    | Use fixtures from `helpers/fixtures` (merged API + POM). API services via `authApi`/`adminApi`/…; admin page objects via `loginPage`/`basePage`. Never `new PageObject(page)` in tests (the `setup.ts` setup project is the only exception). |
-| **Imports — tests**         | `import { test } from 'helpers/fixtures'` and `import { expect } from '@playwright/test'`. For unauthenticated calls only: `import { test as baseTest } from '@playwright/test'` |
+| Rule                        | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dependency Injection**    | Use fixtures from `helpers/fixtures` (merged API + POM). API services via `authApi`/`adminApi`/…; admin page objects via `loginPage`/`basePage`. Never `new PageObject(page)` in tests (the `setup.ts` setup project is the only exception).                                                                                                                                                                                                                   |
+| **Imports — tests**         | `import { test } from 'helpers/fixtures'` and `import { expect } from '@playwright/test'`. For unauthenticated calls only: `import { test as baseTest } from '@playwright/test'`                                                                                                                                                                                                                                                                               |
 | **Fixture selection**       | Prefer the **APIService fixtures** for service-layer calls: `authApi` (X-API-KEY only), `adminApi`/`leaderApi`/`mentorApi`/`mentorshipAdminApi` (X-API-KEY + that role's token), or `apiForRole(role)` for permission-matrix tests. Use the raw **context** fixtures (`authRequest`, `adminContext`, `leaderContext`, `mentorContext`, `mentorshipAdminContext`, `contextForRole(role)`) only for endpoints with no service method yet (mark with `// FIXME`). |
-| **Imports — Paths**         | Import endpoint enums (`AuthEndpoints`, `CmsEndpoints`, `PlatformEndpoints`) from `helpers/datafactory/constants/paths.data`. Import Zod schemas from `helpers/datafactory/schemas/`          |
-| **Dynamic Test Data**       | Always generate dynamic request payloads using Faker factories in `helpers/datafactory/`. Call the factory **inside the service method body** (e.g. `MentorService.register`), not in spec files. Never hardcode test data strings (names, emails, bios). |
-| **Service Layer**           | Add new endpoints as a **client** method (raw `APIResponse`) + a **service** method that builds the payload in its body, takes `ensureSuccess = false`, and returns `TypedAPIResponse<T>`. Keep caller-owned inputs (credentials, ids) as discrete params. Register the service in `api.service.ts`. |
-| **Selectors**               | Prioritize: `getByRole()` > `getByLabel()` > `getByPlaceholder()` > `getByText()` > `getByTestId()`                                       |
-| **Type Safety**             | Use Zod schemas in `helpers/datafactory/schemas/`. Validate responses in the test with `schema.parse(await response.json())`; don't assert what the schema already guarantees (e.g. a `.min(1)` / `z.email()` field's presence). No `any` type. |
-| **Assertions**              | Web-first assertions only: `expect(locator).toBeVisible()`, never `waitForTimeout()`                                                        |
-| **No Secrets**              | Never hardcode credentials. Use `process.env` variables defined in the relevant `.env` file                                                 |
-| **API Test Steps**          | When a test has 2+ API calls, each MUST be in a dedicated `test.step()` with validation                                                     |
-| **Test Verification**       | After adding or modifying test files, run `npx playwright test [file] --project=[api\|admin]` and confirm all tests pass                    |
-| **Explore Before Generate** | **API:** Make a real request to the endpoint before writing Zod schemas to capture actual field names, types, and optional fields. **UI:** Navigate to the page in a browser before writing page objects or selectors. |
+| **Imports — Paths**         | Import endpoint enums (`AuthEndpoints`, `CmsEndpoints`, `PlatformEndpoints`) from `helpers/datafactory/constants/paths.data`. Import Zod schemas from `helpers/datafactory/schemas/`                                                                                                                                                                                                                                                                           |
+| **Dynamic Test Data**       | Always generate dynamic request payloads using Faker factories in `helpers/datafactory/`. Call the factory **inside the service method body** (e.g. `MentorService.register`), not in spec files. Never hardcode test data strings (names, emails, bios).                                                                                                                                                                                                      |
+| **Service Layer**           | Add new endpoints as a **client** method (raw `APIResponse`) + a **service** method that builds the payload in its body, takes `ensureSuccess = false`, and returns `TypedAPIResponse<T>`. Keep caller-owned inputs (credentials, ids) as discrete params. Register the service in `api.service.ts`.                                                                                                                                                           |
+| **Selectors**               | Prioritize: `getByRole()` > `getByLabel()` > `getByPlaceholder()` > `getByText()` > `getByTestId()`                                                                                                                                                                                                                                                                                                                                                            |
+| **Type Safety**             | Use Zod schemas in `helpers/datafactory/schemas/`. Validate responses in the test with `schema.parse(await response.json())`; don't assert what the schema already guarantees (e.g. a `.min(1)` / `z.email()` field's presence). No `any` type.                                                                                                                                                                                                                |
+| **Assertions**              | Web-first assertions only: `expect(locator).toBeVisible()`, never `waitForTimeout()`                                                                                                                                                                                                                                                                                                                                                                           |
+| **No Secrets**              | Never hardcode credentials. Use `process.env` variables defined in the relevant `.env` file                                                                                                                                                                                                                                                                                                                                                                    |
+| **API Test Steps**          | When a test has 2+ API calls, each MUST be in a dedicated `test.step()` with validation                                                                                                                                                                                                                                                                                                                                                                        |
+| **Test Verification**       | After adding or modifying test files, run `npx playwright test [file] --project=[api\|admin]` and confirm all tests pass                                                                                                                                                                                                                                                                                                                                       |
+| **Explore Before Generate** | **API:** Make a real request to the endpoint before writing Zod schemas to capture actual field names, types, and optional fields. **UI:** Navigate to the page in a browser before writing page objects or selectors.                                                                                                                                                                                                                                         |
 
 ---
 
 ## SHOULD (Recommended)
 
-| Rule               | Recommendation                                                                                                      |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| **Test Isolation** | Tests should be independent. Use `test.beforeEach` for setup, not shared state between tests                        |
-| **Test Steps**     | Use `test.step()` with Given/When/Then structure for better readability and reporting                               |
-| **Data Files**     | Extract test data into `helpers/datafactory/` rather than inlining large datasets in spec files                     |
-| **Page Actions**   | Define reusable actions (navigate, click, verify) on page objects rather than repeating them in tests               |
+| Rule               | Recommendation                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| **Test Isolation** | Tests should be independent. Use `test.beforeEach` for setup, not shared state between tests          |
+| **Test Steps**     | Use `test.step()` with Given/When/Then structure for better readability and reporting                 |
+| **Data Files**     | Extract test data into `helpers/datafactory/` rather than inlining large datasets in spec files       |
+| **Page Actions**   | Define reusable actions (navigate, click, verify) on page objects rather than repeating them in tests |
 
 ---
 
 ## WON'T (Forbidden)
 
-| Rule                          | Violation                                                                                                         |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **No XPath**                  | Never use XPath selectors                                                                                         |
-| **No Hard Waits**             | Never use `page.waitForTimeout()`                                                                                 |
-| **No `any`**                  | Never use `any` type                                                                                              |
-| **No Tags on Describe**       | Never put tags in `test.describe()`, only on individual tests                                                     |
-| **No Multiple Tags**          | Each test has exactly ONE tag: `@smoke`, `@sanity`, `@regression`, `@e2e`, or `@api`. Only `@destructive` may be added alongside. |
-| **No Manual Instantiation**   | Never `new PageObject(page)` inside test files                                                                    |
-| **No Hardcoded Endpoints**    | Never write raw URL strings in tests. Always use enums from `helpers/datafactory/constants/paths.data`           |
-| **No Explore-Only Files**     | Never commit test files whose sole purpose is dumping HTML or exploring structure                                  |
-| **No Silent Coverage Drops**  | Never omit a test because the API doesn't behave as expected. Use `test.skip` with `// FIXME` comment instead    |
+| Rule                         | Violation                                                                                                                         |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **No XPath**                 | Never use XPath selectors                                                                                                         |
+| **No Hard Waits**            | Never use `page.waitForTimeout()`                                                                                                 |
+| **No `any`**                 | Never use `any` type                                                                                                              |
+| **No Tags on Describe**      | Never put tags in `test.describe()`, only on individual tests                                                                     |
+| **No Multiple Tags**         | Each test has exactly ONE tag: `@smoke`, `@sanity`, `@regression`, `@e2e`, or `@api`. Only `@destructive` may be added alongside. |
+| **No Manual Instantiation**  | Never `new PageObject(page)` inside test files                                                                                    |
+| **No Hardcoded Endpoints**   | Never write raw URL strings in tests. Always use enums from `helpers/datafactory/constants/paths.data`                            |
+| **No Explore-Only Files**    | Never commit test files whose sole purpose is dumping HTML or exploring structure                                                 |
+| **No Silent Coverage Drops** | Never omit a test because the API doesn't behave as expected. Use `test.skip` with `// FIXME` comment instead                     |
 
 ---
 
 ## File Naming Conventions
 
-| Type             | Directory                            | Pattern               | Example                     |
-| ---------------- | ------------------------------------ | --------------------- | --------------------------- |
-| Page objects     | `tests/admin/pages/`                 | `[name].page.ts`      | `login.page.ts`             |
-| Admin tests      | `tests/admin/tests/`                 | `[name].spec.ts`      | `dashboard.page.spec.ts`    |
-| API tests        | `tests/api/tests/{area}/`            | `[name].flow.spec.ts` | `auth.flow.spec.ts`         |
-| API clients      | `helpers/apifactory/clients/`        | `[name].client.ts`    | `mentor.client.ts`          |
-| API services     | `helpers/apifactory/services/`       | `[name].service.ts`   | `mentor.service.ts`         |
-| Fixtures         | `helpers/fixtures/`                  | `common.fixtures.ts` / `pom.fixture.ts` / `index.ts` | —     |
-| API data factory | `helpers/datafactory/`               | `[name].factory.ts`   | `mentor.factory.ts`         |
-| Zod schemas      | `helpers/datafactory/schemas/`       | `[name].schema.ts`    | `auth.schema.ts`            |
-| API path enums   | `helpers/datafactory/constants/paths.data.ts` | (single file) | —                       |
+| Type             | Directory                                     | Pattern                                              | Example                  |
+| ---------------- | --------------------------------------------- | ---------------------------------------------------- | ------------------------ |
+| Page objects     | `tests/admin/pages/`                          | `[name].page.ts`                                     | `login.page.ts`          |
+| Admin tests      | `tests/admin/tests/`                          | `[name].spec.ts`                                     | `dashboard.page.spec.ts` |
+| API tests        | `tests/api/tests/{area}/`                     | `[name].flow.spec.ts`                                | `auth.flow.spec.ts`      |
+| API clients      | `helpers/apifactory/clients/`                 | `[name].client.ts`                                   | `mentor.client.ts`       |
+| API services     | `helpers/apifactory/services/`                | `[name].service.ts`                                  | `mentor.service.ts`      |
+| Fixtures         | `helpers/fixtures/`                           | `common.fixtures.ts` / `pom.fixture.ts` / `index.ts` | —                        |
+| API data factory | `helpers/datafactory/`                        | `[name].factory.ts`                                  | `mentor.factory.ts`      |
+| Zod schemas      | `helpers/datafactory/schemas/`                | `[name].schema.ts`                                   | `auth.schema.ts`         |
+| API path enums   | `helpers/datafactory/constants/paths.data.ts` | (single file)                                        | —                        |
 
 ---
 
@@ -180,16 +180,36 @@ npx playwright show-report
 
 ---
 
+## Linting & Formatting
+
+ESLint (`typescript-eslint` + `eslint-plugin-playwright`) and Prettier enforce code style; `eslint-config-prettier` keeps them conflict-free. Config: `eslint.config.mjs`, `.prettierrc.json`, `.prettierignore`.
+
+```bash
+npm run lint          # report lint problems
+npm run lint:fix      # auto-fix lint problems
+npm run format        # check formatting (no writes)
+npm run format:fix    # rewrite files to Prettier style
+```
+
+**Pre-commit hook:** A Husky hook (`.husky/pre-commit`) runs `lint-staged` on commit, so only staged files are linted/formatted and re-staged automatically:
+
+- `*.{ts,mjs,js}` → `eslint --fix` then `prettier --write`
+- `*.{json,md,yml,yaml}` → `prettier --write`
+
+The hook installs via the `prepare` script on `npm install`. A non-auto-fixable ESLint error aborts the commit. The `lint-staged` config is in `package.json`. Do not bypass the hook (`--no-verify`) unless explicitly asked.
+
+---
+
 ## Environment Variables
 
 All variables live in `tests/.env` (see `tests/.env.example`). Role credentials feed both the `USERS` model and the per-role API fixtures.
 
-| Variable         | Used by         |
-| ---------------- | --------------- |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD`                       | `USERS.admin` — `adminApi`/`adminContext` + admin setup            |
-| `LEADER_EMAIL` / `LEADER_PASSWORD`                     | `USERS.leader` — `leaderApi`/`leaderContext` + setup               |
-| `MENTOR_EMAIL` / `MENTOR_PASSWORD`                     | `USERS.mentor` — `mentorApi`/`mentorContext` + setup               |
-| `MENTORSHIP_ADMIN_EMAIL` / `MENTORSHIP_ADMIN_PASSWORD` | `USERS.mentorshipAdmin` — `mentorshipAdminApi`/…Context + setup    |
-| `API_HOST`       | api project base URL          |
-| `API_KEY`        | X-API-KEY header (all API requests) |
-| `ADMIN_BASE_URL` | admin project base URL (optional; defaults to `http://localhost:3000`) |
+| Variable                                               | Used by                                                                |
+| ------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD`                       | `USERS.admin` — `adminApi`/`adminContext` + admin setup                |
+| `LEADER_EMAIL` / `LEADER_PASSWORD`                     | `USERS.leader` — `leaderApi`/`leaderContext` + setup                   |
+| `MENTOR_EMAIL` / `MENTOR_PASSWORD`                     | `USERS.mentor` — `mentorApi`/`mentorContext` + setup                   |
+| `MENTORSHIP_ADMIN_EMAIL` / `MENTORSHIP_ADMIN_PASSWORD` | `USERS.mentorshipAdmin` — `mentorshipAdminApi`/…Context + setup        |
+| `API_HOST`                                             | api project base URL                                                   |
+| `API_KEY`                                              | X-API-KEY header (all API requests)                                    |
+| `ADMIN_BASE_URL`                                       | admin project base URL (optional; defaults to `http://localhost:3000`) |
