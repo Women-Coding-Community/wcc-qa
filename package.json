@@ -8,21 +8,25 @@
     "test:admin": "playwright test --project=admin",
     "typecheck": "tsc --noEmit",
     "report": "playwright show-report",
-    "lint": "oxlint helpers tests playwright.config.ts",
-    "lint:fix": "oxlint --fix helpers tests playwright.config.ts",
-    "format": "oxfmt helpers tests playwright.config.ts",
-    "format:fix": "oxfmt --fix helpers tests playwright.config.ts"
+    "lint": "eslint helpers tests playwright.config.ts",
+    "lint:fix": "eslint --fix helpers tests playwright.config.ts",
+    "format": "prettier --check helpers tests playwright.config.ts",
+    "format:fix": "prettier --write helpers tests playwright.config.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.5.0",
-    "oxfmt": "^0.54.0",
-    "oxlint": "^1.69.0",
-    "typescript": "^6.0.2"
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.10.4",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.61.1"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
