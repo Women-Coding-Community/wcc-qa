@@ -87,6 +87,35 @@ Three Playwright projects are defined in [playwright.config.ts](playwright.confi
 
 ---
 
+## Linting & Formatting
+
+Code style is enforced by **ESLint** (with `typescript-eslint` and `eslint-plugin-playwright`) and **Prettier**. The two are kept conflict-free via `eslint-config-prettier`.
+
+```bash
+# Lint
+npm run lint          # report problems
+npm run lint:fix      # auto-fix what ESLint can
+
+# Format
+npm run format        # check formatting (no writes)
+npm run format:fix    # rewrite files to match Prettier
+```
+
+Configuration lives in [eslint.config.mjs](eslint.config.mjs), [.prettierrc.json](.prettierrc.json), and [.prettierignore](.prettierignore).
+
+### Pre-commit hook
+
+A **Husky** pre-commit hook runs **lint-staged** so every commit is automatically linted and formatted — only the files you staged are touched:
+
+- `*.{ts,mjs,js}` → `eslint --fix` then `prettier --write`
+- `*.{json,md,yml,yaml}` → `prettier --write`
+
+The fixes are re-staged automatically. If ESLint reports a non-auto-fixable error, the commit is aborted so it can be resolved first.
+
+The hook installs itself on `npm install` via the `prepare` script, so no extra setup is needed after cloning. The hook definition is in [.husky/pre-commit](.husky/pre-commit) and the lint-staged config is the `lint-staged` block in [package.json](package.json).
+
+---
+
 ## Project Structure
 
 ```
@@ -119,6 +148,9 @@ tests/
 
 playwright.config.ts                  Projects: setup, api, admin (admin depends on setup)
 tsconfig.json                         paths: helpers/* and tests/* → bare imports from repo root
+eslint.config.mjs                     ESLint flat config (typescript-eslint + playwright + prettier)
+.prettierrc.json / .prettierignore    Prettier formatting rules and ignore list
+.husky/pre-commit                     Pre-commit hook — runs lint-staged
 ```
 
 All imports use bare specifiers resolved via tsconfig `paths` (e.g. `helpers/fixtures`, `tests/admin/pages/login.page`) — no relative `../../` paths in specs.
@@ -139,16 +171,16 @@ A two-layer design, aggregated by `APIService` and exposed through role-scoped f
 ### Example
 
 ```ts
-import { test } from 'helpers/fixtures';
-import { expect } from '@playwright/test';
-import { loginResponseSchema } from 'helpers/datafactory/schemas/auth.schema';
+import { test } from "helpers/fixtures";
+import { expect } from "@playwright/test";
+import { loginResponseSchema } from "helpers/datafactory/schemas/auth.schema";
 
-test('login returns a valid session', async ({ authApi }) => {
-  // ensureSuccess: true → asserts the response is ok before returning
-  const response = await authApi.authentication.login(email, password, true);
+test("login returns a valid session", async ({ authApi }) => {
+	// ensureSuccess: true → asserts the response is ok before returning
+	const response = await authApi.authentication.login(email, password, true);
 
-  // Runtime schema validation; throws (fails the test) on shape drift
-  loginResponseSchema.parse(await response.json());
+	// Runtime schema validation; throws (fails the test) on shape drift
+	loginResponseSchema.parse(await response.json());
 });
 ```
 
