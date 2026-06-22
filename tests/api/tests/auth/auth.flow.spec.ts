@@ -2,17 +2,12 @@ import { expect } from "@playwright/test";
 import { test } from "helpers/fixtures/common.fixtures";
 import { loginResponseSchema } from "helpers/datafactory/schemas/auth.schema";
 import { usersResponseSchema } from "helpers/datafactory/schemas/user.account.schema";
-
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+import { USERS } from "helpers/datafactory/constants/roles.data";
 
 test.describe("AUTH-01: Login", () => {
+	// eslint-disable-next-line playwright/expect-expect -- schema.parse() throws on a malformed response, so it is the assertion.
 	test("Login with valid credentials returns token", async ({ authApi }) => {
-		if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
-			throw new Error("Missing admin credentials — check tests/.env");
-		}
-
-		const response = await authApi.authentication.login(ADMIN_EMAIL, ADMIN_PASSWORD, true);
+		const response = await authApi.authentication.login(USERS.admin.email, USERS.admin.password, true);
 
 		// Schema parse verifies token, expiresAt, and roles are present and well-formed.
 		loginResponseSchema.parse(await response.json());
