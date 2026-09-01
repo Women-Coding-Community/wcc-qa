@@ -116,6 +116,12 @@ The hook installs itself on `npm install` via the `prepare` script, so no extra 
 
 ---
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, local checks, branch naming, and pull request expectations.
+
+---
+
 ## Project Structure
 
 ```
