@@ -24,6 +24,8 @@ npx playwright install
 #    Copy tests/.env.example to tests/.env and fill in the values
 ```
 
+Setup guides for the backend, admin portal and frontend are in [`docs/`](docs/README.md).
+
 ### Environment variables
 
 Tests read configuration from **`tests/.env`** (copy [`tests/.env.example`](tests/.env.example)):
