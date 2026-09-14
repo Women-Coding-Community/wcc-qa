@@ -190,3 +190,7 @@ For negative/permission tests, omit `ensureSuccess` and assert the status on the
 const response = await adminApi.mentor.accept(mentorId); // no ensureSuccess
 expect(response.status()).toBe(409);
 ```
+
+## Code of Conduct
+
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
