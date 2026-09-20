@@ -26,9 +26,12 @@ helpers/                 — Test support code, kept outside tests/
     schemas/             — Zod response schemas, one file per resource
     *.factory.ts         — Faker payload factories, one per resource
   fixtures/              — API fixtures, POM fixtures, and the merged `test` (index.ts)
+  environment/           — switchCycle(): opens a mentorship cycle on the Docker stack (phase setups only)
 
 tests/
   .env                   — All env vars (gitignored; see .env.example)
+  cycle.ad-hoc.setup.ts  — setup_ad_hoc project: opens the ad-hoc cycle before the @ad-hoc tests
+  cycle.restore.setup.ts — its teardown: switches back to long-term
   api/
     TEST_PLAN.md         — API flow plan: every flow and test case ID
     tests/{area}/        — API specs grouped by domain area
@@ -38,8 +41,10 @@ tests/
     setup.ts             — Setup project: logs each role in, saves storageState
     .auth/               — Saved per-role sessions (gitignored)
 
-playwright.config.ts     — Projects: setup, api, admin (admin depends on setup)
+playwright.config.ts     — Two phases: base (setup → admin, api) then ad-hoc (setup_ad_hoc → api_ad_hoc, admin_ad_hoc → restore_cycle)
 ```
+
+**Mentorship cycles:** the Docker stack has one database, so only one mentorship cycle is open at a time — `npm run env:up` seeds long-term. `playwright.config.ts` therefore runs two phases: the **base phase** (`api`, `admin`) runs every test _not_ tagged `@ad-hoc` against the seeded long-term cycle; then `setup_ad_hoc` switches the stack (`switchCycle()` → wcc-backend's `app-stack.sh cycle`, needs Docker + the checkout) and the **ad-hoc phase** (`api_ad_hoc`, `admin_ad_hoc`) runs only `@ad-hoc` tests; `restore_cycle` switches back. Tests never switch the cycle themselves. Most tests are cycle-agnostic and stay untagged; a test that needs the ad-hoc cycle carries `@ad-hoc`; `@long-term` is documentary for the rare test that needs the default (e.g. `CYCLE-08`). If a base-phase test fails, Playwright skips the ad-hoc phase.
 
 **Anchors worth knowing by name:** `helpers/apifactory/api.service.ts` (register new services here), `helpers/datafactory/constants/paths.data.ts` (all endpoint enums), `helpers/datafactory/constants/roles.data.ts` (`USERS`, `Role`), `helpers/fixtures/index.ts` (merged `test`).
 
@@ -67,7 +72,7 @@ Two-layer API design, aggregated by `APIService` (`helpers/apifactory/api.servic
   - Takes a trailing `ensureSuccess = false` flag; when `true`, calls `ensureSuccess(response)` from `api.helper.ts` to throw on a non-ok response (happy path / preconditions / cleanup).
   - **Always returns `TypedAPIResponse<T>`** so callers get a typed `.json()`. (Delete-style calls with no body return plain `APIResponse`.)
 - **`api.helper.ts`** — `TypedAPIResponse<T>` (typed `.json()`) and the `ensureSuccess(response)` guard.
-- **Fixtures** — `authApi` (X-API-KEY only) for public endpoints; `<role>Api` for authenticated roles; `apiForRole(role)` for role-matrix tests. Each wraps an `APIService` over the matching context. Tokens are cached per worker, so each role logs in at most once.
+- **Fixtures** — `authApi` (X-API-KEY only) for public endpoints; `noApiKeyApi` / `invalidTokenApi` for the negative auth cases; `<role>Api` for authenticated roles; `apiForRole(role)` for role-matrix tests. Each is an `APIService` over a context with those headers; the context itself is reachable as `.request`. Tokens are cached per worker, so each role logs in at most once.
 
 **In tests:** call the service, assert the status when a specific code matters (201/204/409), then validate the body with `schema.parse(await response.json())`. Use `ensureSuccess: true` for the happy path; for negative cases leave it `false` and assert the status on the returned response.
 
@@ -79,7 +84,7 @@ Two-layer API design, aggregated by `APIService` (`helpers/apifactory/api.servic
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Dependency Injection**    | Use fixtures from `helpers/fixtures` (merged API + POM). API services via `authApi`/`adminApi`/…; admin page objects via `loginPage`/`basePage`. Never `new PageObject(page)` in tests (the `setup.ts` setup project is the only exception).                                                                                                                                                                                                                         |
 | **Imports — tests**         | `import { test } from 'helpers/fixtures'` (merged) and `import { expect } from '@playwright/test'`. API-only specs may import `helpers/fixtures/common.fixtures` instead to skip the POM fixtures — both are in use today. Never import `test` from `@playwright/test` in a spec                                                                                                                                                                                     |
-| **Fixture selection**       | Prefer the **APIService fixtures**: `authApi` (X-API-KEY only), `<role>Api` (X-API-KEY + that role's token), or `apiForRole(role)` for permission-matrix tests. Use the raw **context** fixtures (`authRequest`, `<role>Context`, `contextForRole(role)`) only for endpoints with no service method yet, or for deliberately malformed payloads a service won't build — mark with `// FIXME`                                                                         |
+| **Fixture selection**       | Prefer the **APIService fixtures**: `authApi` (X-API-KEY only), `<role>Api` (X-API-KEY + that role's token), or `apiForRole(role)` for permission-matrix tests. Use the raw context behind a service (`authApi.request`, `adminApi.request`, …) only for endpoints with no service method yet, or for deliberately malformed payloads a service won't build — mark with `// FIXME`                                                                                   |
 | **Imports — Paths**         | Import endpoint enums (`AuthEndpoints`, `CmsEndpoints`, `PlatformEndpoints`) from `helpers/datafactory/constants/paths.data`. Import Zod schemas from `helpers/datafactory/schemas/`                                                                                                                                                                                                                                                                                 |
 | **Dynamic Test Data**       | Always generate dynamic request payloads using Faker factories in `helpers/datafactory/`. Call the factory **inside the service method body** (e.g. `MentorService.register`), not in spec files. Never hardcode test data strings (names, emails, bios).                                                                                                                                                                                                            |
 | **Service Layer**           | Add new endpoints as a **client** method (raw `APIResponse`) + a **service** method that builds the payload in its body, takes `ensureSuccess = false`, and returns `TypedAPIResponse<T>`. Keep caller-owned inputs (credentials, ids) as discrete params. Register the service in `api.service.ts`.                                                                                                                                                                 |
@@ -90,7 +95,7 @@ Two-layer API design, aggregated by `APIService` (`helpers/apifactory/api.servic
 | **No Secrets**              | Never hardcode credentials. Use `process.env` variables defined in the relevant `.env` file. Never log a token, password, or `API_KEY`, and never assert on a secret's literal value                                                                                                                                                                                                                                                                                 |
 | **Artefacts Are Sensitive** | Traces, HTML reports and `test-results/` capture request headers — including `Authorization: Bearer` tokens and `X-API-KEY`. They are gitignored; never attach them to a GitHub issue, PR, or external share without stripping headers first                                                                                                                                                                                                                         |
 | **API Test Steps**          | When a test has 2+ API calls, each MUST be in a dedicated `test.step()` with validation                                                                                                                                                                                                                                                                                                                                                                              |
-| **Test Verification**       | After adding or modifying any `.ts` file, run `npm run typecheck`. After adding or modifying test files, also run `npx playwright test [file] --project=[api\|admin]` and confirm all tests pass                                                                                                                                                                                                                                                                     |
+| **Test Verification**       | After adding or modifying any `.ts` file, run `npm run typecheck`. After adding or modifying test files, also run `npx playwright test [file] --project=<api\|admin>` (or `npm run test:api` / `npm run test:admin`) and confirm all tests pass                                                                                                                                                                                                                      |
 | **Test IDs**                | Every plan ID appears in the test that covers it. **One test per ID:** put it in the `test.describe()` title (`AUTH-01: Login`). **One flow test covering several IDs:** put each ID on its `test.step()` (`MENTOR-A01: …`) and give the describe a plain descriptive title. **API tests:** every ID must have a matching row in `tests/api/TEST_PLAN.md`, added in the same change. **Admin tests:** no plan file yet — use `ADMIN-<AREA>-<NN>` and keep IDs unique |
 | **Explore Before Generate** | **API:** Make a real request to the endpoint before writing Zod schemas to capture actual field names, types, and optional fields. **UI:** Navigate to the page in a browser before writing page objects or selectors.                                                                                                                                                                                                                                               |
 
@@ -110,18 +115,18 @@ Two-layer API design, aggregated by `APIService` (`helpers/apifactory/api.servic
 
 ## WON'T (Forbidden)
 
-| Rule                         | Violation                                                                                                                         |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **No XPath**                 | Never use XPath selectors                                                                                                         |
-| **No Hard Waits**            | Never use `page.waitForTimeout()`                                                                                                 |
-| **No `any`**                 | Never use `any` type                                                                                                              |
-| **No Tags on Describe**      | Never put tags in `test.describe()`, only on individual tests                                                                     |
-| **No Multiple Tags**         | Each test has exactly ONE tag: `@smoke`, `@sanity`, `@regression`, `@e2e`, or `@api`. Only `@destructive` may be added alongside. |
-| **No Manual Instantiation**  | Never `new PageObject(page)` inside test files                                                                                    |
-| **No Hardcoded Endpoints**   | Never write raw URL strings in tests. Always use enums from `helpers/datafactory/constants/paths.data`                            |
-| **No Explore-Only Files**    | Never commit test files whose sole purpose is dumping HTML or exploring structure                                                 |
-| **No Silent Coverage Drops** | Never omit a test because the API doesn't behave as expected. Use `test.skip` with `// FIXME` comment instead                     |
-| **No Magic Numbers**         | Never inline timeouts, retry counts, or repeated numeric literals. Define them in `helpers/datafactory/constants/`                |
+| Rule                         | Violation                                                                                                                                                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **No XPath**                 | Never use XPath selectors                                                                                                                                                                                      |
+| **No Hard Waits**            | Never use `page.waitForTimeout()`                                                                                                                                                                              |
+| **No `any`**                 | Never use `any` type                                                                                                                                                                                           |
+| **No Tags on Describe**      | Never put tags in `test.describe()`, only on individual tests                                                                                                                                                  |
+| **No Multiple Tags**         | Each test has exactly ONE kind tag: `@smoke`, `@sanity`, `@regression`, `@e2e`, or `@api`. Only `@destructive`, and the cycle tags `@ad-hoc` / `@long-term` (see _Mentorship cycles_), may be added alongside. |
+| **No Manual Instantiation**  | Never `new PageObject(page)` inside test files                                                                                                                                                                 |
+| **No Hardcoded Endpoints**   | Never write raw URL strings in tests. Always use enums from `helpers/datafactory/constants/paths.data`                                                                                                         |
+| **No Explore-Only Files**    | Never commit test files whose sole purpose is dumping HTML or exploring structure                                                                                                                              |
+| **No Silent Coverage Drops** | Never omit a test because the API doesn't behave as expected. Use `test.skip` with `// FIXME` comment instead                                                                                                  |
+| **No Magic Numbers**         | Never inline timeouts, retry counts, or repeated numeric literals. Define them in `helpers/datafactory/constants/`                                                                                             |
 
 ---
 
@@ -175,13 +180,13 @@ The MUST/SHOULD/WON'T tables above are the rules; this section is the **order of
 
 Tests run against **live local services** — there is no mocking. Failures are far more often a missing service than a broken test.
 
-| Project | Needs                                                                                   | Symptom when missing                                                          |
-| ------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `api`   | wcc-backend on `API_HOST` (`docker compose -f docker/docker-compose.qa.yml up --build`) | Connection refused / every test fails at login                                |
-| `admin` | the above **plus** the Next.js admin frontend on `ADMIN_BASE_URL`                       | Every admin test fails in the `setup` project before its own body runs        |
-| both    | `tests/.env` populated from `tests/.env.example`                                        | `Missing required env var "X" — check tests/.env` (thrown by `roles.data.ts`) |
+| Project | Needs                                                             | Symptom when missing                                                          |
+| ------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `api`   | wcc-backend on `API_HOST`                                         | Connection refused / every test fails at login                                |
+| `admin` | the above **plus** the Next.js admin frontend on `ADMIN_BASE_URL` | Every admin test fails in the `setup` project before its own body runs        |
+| both    | `tests/.env` populated from `tests/.env.example`                  | `Missing required env var "X" — check tests/.env` (thrown by `roles.data.ts`) |
 
-Use the backend's **`qa` profile** specifically — it seeds the MENTORSHIP_ADMIN, MENTOR and LEADER accounts the role fixtures log in as. The default profile seeds only admin.
+The simplest way to satisfy both rows is the full application stack from wcc-backend, driven from here: `npm run env:up` (= `${WCC_BACKEND_DIR:-../wcc-backend}/scripts/app-stack.sh up`). It starts the backend and the admin portal on `http://localhost:3000`, then runs the backend's seed script, which creates the MENTORSHIP_ADMIN, MENTOR (`mentor@wcc.dev`, long-term) and LEADER accounts the role fixtures log in as — plus `mentor-adhoc@wcc.dev` (ad-hoc mentor) and `member@wcc.dev` (plain member), not yet wired to fixtures — the MENTORS page and an open mentorship cycle (the backend itself bootstraps only `admin@wcc.dev`). Without the seed, only the admin account exists. `npm run env:purge` resets the database; `npm run env:cycle -- <long-term|ad-hoc>` switches which cycle is open. `tests/.env.example` already holds the stack's values — copy it to `tests/.env` as-is.
 
 `admin` depends on the `setup` project, which drives a real browser login per role and writes `tests/admin/.auth/*.json`. A wall of admin failures with no assertion errors means setup could not reach the frontend.
 
@@ -191,9 +196,14 @@ Use the backend's **`qa` profile** specifically — it seeds the MENTORSHIP_ADMI
 # Type-check without running anything (fastest feedback on schema/type errors)
 npm run typecheck
 
-# Run all tests for a specific project
-npm run test:api      # = playwright test --project=api
-npm run test:admin    # = playwright test --project=admin
+# Run everything, or one project
+npm test                    # base phase, then the @ad-hoc phase (that switch needs Docker + wcc-backend checkout)
+npm run test:api            # = playwright test --project=api    (needs only the backend; no @ad-hoc tests)
+npm run test:admin          # = playwright test --project=admin  (runs setup first)
+
+# Iterate on an @ad-hoc test without the whole chain: switch the stack yourself, skip dependencies
+npm run env:cycle -- ad-hoc && npx playwright test --project=api_ad_hoc --no-deps
+npm run test:api -- --grep @smoke
 
 # Run a specific file
 npx playwright test tests/api/tests/auth/auth.flow.spec.ts --project=api
@@ -201,8 +211,8 @@ npx playwright test tests/api/tests/auth/auth.flow.spec.ts --project=api
 # Run with console output visible
 npx playwright test --project=api --reporter=line
 
-# Open HTML report
-npx playwright show-report
+# Open the HTML report
+npm run report
 ```
 
 ---
@@ -231,11 +241,11 @@ The hook installs via the `prepare` script on `npm install`. A non-auto-fixable 
 
 All variables live in `tests/.env` (see `tests/.env.example`). Role credentials feed both the `USERS` model and the per-role API fixtures.
 
-| Variable                           | Used by                                                                                                                                                           |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<ROLE>_EMAIL` / `<ROLE>_PASSWORD` | One pair per role in `roles.data.ts` → `USERS.<role>`, the `<role>Api`/`<role>Context` fixtures, and admin setup. Missing values throw at load with a named error |
-| `API_HOST`                         | api project base URL                                                                                                                                              |
-| `API_KEY`                          | X-API-KEY header (all API requests)                                                                                                                               |
-| `ADMIN_BASE_URL`                   | admin project base URL (optional; defaults to `http://localhost:3000`)                                                                                            |
+| Variable                           | Used by                                                                                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<ROLE>_EMAIL` / `<ROLE>_PASSWORD` | One pair per role in `roles.data.ts` → `USERS.<role>`, the `<role>Api` fixtures, and admin setup. Missing values throw at load with a named error |
+| `API_HOST`                         | api project base URL                                                                                                                              |
+| `API_KEY`                          | X-API-KEY header (all API requests)                                                                                                               |
+| `ADMIN_BASE_URL`                   | admin project base URL (optional; defaults to `http://localhost:3000`)                                                                            |
 
 `roles.data.ts` is the single source of truth for which roles exist — adding one there means adding its `.env` pair and its fixtures.

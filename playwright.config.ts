@@ -1,91 +1,87 @@
 import { defineConfig, devices } from "@playwright/test";
-
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
 import dotenv from "dotenv";
 import path from "path";
 
-/**
- * Load env per project. Each file is optional — missing ones are ignored — so
- * adding the admin/UI project later is just a matter of dropping in its `.env`.
- * dotenv does not override already-set vars, so earlier files win on collision.
- */
 dotenv.config({ path: path.resolve(__dirname, "tests/.env"), quiet: true });
 
+/** Shared by the admin project and the setup project that logs its roles in. */
+const adminUse = {
+	...devices["Desktop Safari"],
+	baseURL: process.env.ADMIN_BASE_URL || "http://localhost:3000",
+};
+
 /**
- * See https://playwright.dev/docs/test-configuration.
+ * Projects — two phases, because the Docker stack has one mentorship cycle open at a time:
+ *
+ *   base phase (long-term, as seeded)     every test NOT tagged @ad-hoc
+ *     setup          logs every role into the admin portal and saves the sessions (tests/admin/setup.ts)
+ *     api            needs only the backend
+ *     admin          needs the backend + admin portal; depends on setup
+ *
+ *   ad-hoc phase (after the base phase)   only tests tagged @ad-hoc
+ *     setup_ad_hoc   switches the stack to the ad-hoc cycle (Docker + wcc-backend checkout)
+ *     api_ad_hoc, admin_ad_hoc
+ *     restore_cycle  teardown: switches back to long-term
+ *
+ * Untagged = cycle-agnostic. `@long-term` is documentary only (the base phase is long-term anyway).
+ * If any base-phase test fails, Playwright skips the ad-hoc phase (dependency semantics).
  */
 export default defineConfig({
 	testDir: "./tests",
-	/* Run tests in files in parallel */
 	fullyParallel: true,
-	/* Fail the build on CI if you accidentally left test.only in the source code. */
 	forbidOnly: !!process.env.CI,
-	/* Retry on CI only */
 	retries: process.env.CI ? 2 : 0,
-	/* Opt out of parallel tests on CI. */
 	workers: process.env.CI ? 1 : undefined,
-	/* Reporter to use. See https://playwright.dev/docs/test-reporters */
 	reporter: [["list"], ["html", { open: "never" }]],
-	/* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
 	use: {
-		/* Base URL to use in actions like `await page.goto('')`. */
-		// baseURL: 'http://localhost:3000',
-
-		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
 		trace: "on-first-retry",
 	},
 
-	/* Configure projects for major browsers */
 	projects: [
+		// ── base phase ──────────────────────────────────────────────────────────────
 		{
 			name: "setup",
-			testMatch: /setup\.ts/,
+			testMatch: /admin\/setup\.ts/,
+			use: adminUse,
 		},
 		{
 			name: "api",
 			testDir: "./tests/api/tests",
-			use: {
-				baseURL: process.env.API_HOST,
-			},
+			grepInvert: /@ad-hoc/,
+			use: { baseURL: process.env.API_HOST },
 		},
 		{
 			name: "admin",
 			testDir: "./tests/admin/tests",
-			use: {
-				...devices["Desktop Safari"],
-				baseURL: process.env.ADMIN_BASE_URL ?? "http://localhost:3000",
-			},
+			grepInvert: /@ad-hoc/,
+			use: adminUse,
 			dependencies: ["setup"],
 		},
 
-		/* Test against mobile viewports. */
-		// {
-		//   name: 'Mobile Chrome',
-		//   use: { ...devices['Pixel 5'] },
-		// },
-		// {
-		//   name: 'Mobile Safari',
-		//   use: { ...devices['iPhone 12'] },
-		// },
-
-		/* Test against branded browsers. */
-		// {
-		//   name: 'Microsoft Edge',
-		//   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-		// },
-		// {
-		//   name: 'Google Chrome',
-		//   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-		// },
+		// ── ad-hoc phase ────────────────────────────────────────────────────────────
+		{
+			name: "setup_ad_hoc",
+			testMatch: /cycle\.ad-hoc\.setup\.ts/,
+			dependencies: ["api", "admin"],
+			teardown: "restore_cycle",
+		},
+		{
+			name: "api_ad_hoc",
+			testDir: "./tests/api/tests",
+			grep: /@ad-hoc/,
+			use: { baseURL: process.env.API_HOST },
+			dependencies: ["setup_ad_hoc"],
+		},
+		{
+			name: "admin_ad_hoc",
+			testDir: "./tests/admin/tests",
+			grep: /@ad-hoc/,
+			use: adminUse,
+			dependencies: ["setup_ad_hoc"],
+		},
+		{
+			name: "restore_cycle",
+			testMatch: /cycle\.restore\.setup\.ts/,
+		},
 	],
-
-	/* Run your local dev server before starting the tests */
-	// webServer: {
-	//   command: 'npm run start',
-	//   url: 'http://localhost:3000',
-	//   reuseExistingServer: !process.env.CI,
-	// },
 });

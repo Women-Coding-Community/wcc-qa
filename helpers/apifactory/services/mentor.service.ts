@@ -20,6 +20,13 @@ export class MentorService {
 		return response;
 	}
 
+	/** Accepts a string id so specs can assert how the API handles a non-numeric path variable. */
+	async getById(id: number | string, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
+		const response = await this.client.getById(id);
+		if (ensureSuccess) assertSuccess(response);
+		return response;
+	}
+
 	async accept(id: number, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
 		const response = await this.client.accept(id);
 		if (ensureSuccess) assertSuccess(response);

@@ -1,7 +1,8 @@
 {
 	"name": "wcc-qa",
 	"version": "1.0.0",
-	"main": "index.js",
+	"private": true,
+	"license": "ISC",
 	"scripts": {
 		"test": "playwright test",
 		"test:api": "playwright test --project=api",
@@ -12,6 +13,10 @@
 		"lint:fix": "eslint --fix helpers tests playwright.config.ts",
 		"format": "prettier --check helpers tests playwright.config.ts",
 		"format:fix": "prettier --write helpers tests playwright.config.ts",
+		"env:up": "\"${WCC_BACKEND_DIR:-../wcc-backend}/scripts/app-stack.sh\" up",
+		"env:down": "\"${WCC_BACKEND_DIR:-../wcc-backend}/scripts/app-stack.sh\" down",
+		"env:purge": "\"${WCC_BACKEND_DIR:-../wcc-backend}/scripts/app-stack.sh\" up --purge",
+		"env:cycle": "\"${WCC_BACKEND_DIR:-../wcc-backend}/scripts/app-stack.sh\" cycle",
 		"prepare": "husky"
 	},
 	"lint-staged": {
@@ -23,10 +28,6 @@
 			"prettier --write"
 		]
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"description": "",
 	"devDependencies": {
 		"@eslint/js": "^9.39.4",
 		"@playwright/test": "^1.58.2",
