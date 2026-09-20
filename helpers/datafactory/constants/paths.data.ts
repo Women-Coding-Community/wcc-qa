@@ -32,6 +32,7 @@ export enum CmsEndpoints {
 export enum PlatformEndpoints {
 	MENTORS = "/api/platform/v1/mentors",
 	MEMBERS = "/api/platform/v1/members",
+	RESOURCES_MEMBER_PROFILE_PICTURE = "/api/platform/v1/resources/member-profile-picture",
 }
 
 /** Auth endpoints */
