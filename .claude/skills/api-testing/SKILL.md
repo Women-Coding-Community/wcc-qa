@@ -17,7 +17,7 @@ All fixtures come from `helpers/fixtures` (merged API + POM). Prefer the **APISe
 | `adminApi` / `leaderApi` / `mentorApi` / `mentorshipAdminApi` | Endpoints needing a Bearer token, as a specific role     | `X-API-KEY` + that role's token   |
 | `apiForRole(role)`                                            | Permission-matrix tests looping over roles               | `X-API-KEY` + chosen role's token |
 
-The raw context fixtures (`authRequest`, `adminContext`, …, `contextForRole`) are an **escape hatch only** — use them when an endpoint has no service method yet, and mark the call with `// FIXME`. The fix is to add the client + service method, not to keep using the context.
+The raw context behind a service (`authApi.request`, `adminApi.request`, …) is an **escape hatch only** — use it when an endpoint has no service method yet, and mark the call with `// FIXME`. The fix is to add the client + service method, not to keep using the context.
 
 Tokens are cached per worker (each role logs in at most once), and contexts are disposed after the test.
 
@@ -119,11 +119,11 @@ An empty-body test alone is never sufficient.
 const requiredFields = ["email", "password"] as const;
 
 for (const field of requiredFields) {
-	test(`Login returns 400 when ${field} is missing`, async ({ authRequest }) => {
+	test(`Login returns 400 when ${field} is missing`, async ({ authApi }) => {
 		const { [field]: _omitted, ...payload } = validPayload;
 
 		// FIXME: no service method for malformed-login payloads — using the raw context.
-		const response = await authRequest.post(AuthEndpoints.LOGIN, { data: payload });
+		const response = await authApi.request.post(AuthEndpoints.LOGIN, { data: payload });
 
 		expect(response.status()).toBe(400);
 	});
@@ -138,8 +138,8 @@ This is the legitimate escape-hatch case: service methods build well-formed payl
 const invalidEmails = [123, true, null, "not-an-email"];
 
 for (const invalidValue of invalidEmails) {
-	test(`Login returns 400 when email is ${JSON.stringify(invalidValue)}`, async ({ authRequest }) => {
-		const response = await authRequest.post(AuthEndpoints.LOGIN, {
+	test(`Login returns 400 when email is ${JSON.stringify(invalidValue)}`, async ({ authApi }) => {
+		const response = await authApi.request.post(AuthEndpoints.LOGIN, {
 			data: { email: invalidValue, password: USERS.admin.password },
 		});
 
@@ -154,8 +154,8 @@ Write the test as the spec says it _should_ work, then `test.skip` it with a `//
 
 ```typescript
 // FIXME: API returns 500 instead of 400 for missing password. Backend bug.
-test.skip("Login returns 400 when password is missing", async ({ authRequest }) => {
-	const response = await authRequest.post(AuthEndpoints.LOGIN, { data: { email: USERS.admin.email } });
+test.skip("Login returns 400 when password is missing", async ({ authApi }) => {
+	const response = await authApi.request.post(AuthEndpoints.LOGIN, { data: { email: USERS.admin.email } });
 
 	expect(response.status()).toBe(400);
 });

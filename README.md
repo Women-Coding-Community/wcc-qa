@@ -21,69 +21,61 @@ npm install
 npx playwright install
 
 # 3. Configure environment (see below)
-#    Copy tests/.env.example to tests/.env and fill in the values
+cp tests/.env.example tests/.env
 ```
 
 ### Environment variables
 
-Tests read configuration from **`tests/.env`** (copy [`tests/.env.example`](tests/.env.example)):
+Tests read configuration from **`tests/.env`**. [`tests/.env.example`](tests/.env.example) ships with the local Docker stack's values (`npm run env:up`), so copying it is enough; point the variables elsewhere to target another environment.
 
-```dotenv
-# Target API
-API_HOST=https://your-api-host
-API_KEY=your-x-api-key
+| Variable                           | Used by                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------- |
+| `API_HOST`                         | Base URL of the backend (api project and all API fixtures)                            |
+| `API_KEY`                          | `X-API-KEY` header sent with every API request                                        |
+| `ADMIN_BASE_URL`                   | Base URL of the admin portal (admin project and the login setup)                      |
+| `<ROLE>_EMAIL` / `<ROLE>_PASSWORD` | One pair per role in `roles.data.ts`: `ADMIN`, `LEADER`, `MENTOR`, `MENTORSHIP_ADMIN` |
 
-# Admin/UI base URL (optional — defaults to http://localhost:3000)
-ADMIN_BASE_URL=
-
-# Role credentials (used by the per-role fixtures and the admin setup project)
-ADMIN_EMAIL=
-ADMIN_PASSWORD=
-
-LEADER_EMAIL=
-LEADER_PASSWORD=
-
-MENTOR_EMAIL=
-MENTOR_PASSWORD=
-
-MENTORSHIP_ADMIN_EMAIL=
-MENTORSHIP_ADMIN_PASSWORD=
-```
-
-> ⚠️ Never commit real credentials. `.env` holds secrets only — all values come from `process.env`.
+> ⚠️ Never commit real credentials. `.env` is gitignored — all values come from `process.env`.
 
 ---
 
 ## Running Tests
 
+The suites run against the local Docker stack (see _Local Setup_ in [CONTRIBUTING.md](CONTRIBUTING.md)).
+
 ```bash
-# All tests (both projects)
-npm test
+npm test                  # everything: base phase, then the @ad-hoc phase (Docker + wcc-backend checkout)
+npm run test:api          # API tests — needs only the backend
+npm run test:admin        # admin UI tests — logs each role in first (setup project)
+npm run test:api -- --grep @smoke
 
-# API tests only
-npm run test:api
-
-# Admin (UI) tests only
-npm run test:admin
-
-# Type-check without running tests
-npm run typecheck
-
-# Open the last HTML report
-npm run report
+npm run typecheck         # type-check without running tests
+npm run report            # open the HTML report of the last run
 ```
 
-For ad-hoc runs (single file, specific reporter), call Playwright directly:
+For anything finer-grained, call Playwright directly:
 
 ```bash
-# A single file
 npx playwright test tests/api/tests/auth/auth.flow.spec.ts --project=api
-
-# Live console output
 npx playwright test --project=api --reporter=line
+npx playwright test --ui
 ```
 
-Three Playwright projects are defined in [playwright.config.ts](playwright.config.ts): **`setup`** (logs each role in and saves its `storageState`), **`api`** (headless API flows), and **`admin`** (Desktop Safari UI; depends on `setup`). Admin tests authenticate by loading a role's saved session — e.g. `test.use({ storageState: USERS.mentor.storageState })`.
+Projects in [playwright.config.ts](playwright.config.ts) run in two phases, because the stack has one
+mentorship cycle open at a time:
+
+| Phase                       | Project                      | Runs                                                                        | Needs                         |
+| --------------------------- | ---------------------------- | --------------------------------------------------------------------------- | ----------------------------- |
+| base (long-term, as seeded) | `setup`                      | `tests/admin/setup.ts` — logs every role in, saves sessions                 | backend + admin portal        |
+|                             | `api`                        | `tests/api/tests/**` not tagged `@ad-hoc`                                   | backend                       |
+|                             | `admin`                      | `tests/admin/tests/**` not tagged `@ad-hoc` (Desktop Safari), after `setup` | backend + admin portal        |
+| ad-hoc (after base)         | `setup_ad_hoc`               | switches the stack to the ad-hoc cycle                                      | Docker + wcc-backend checkout |
+|                             | `api_ad_hoc`, `admin_ad_hoc` | only tests tagged `@ad-hoc`                                                 | as above                      |
+|                             | `restore_cycle`              | teardown — switches back to long-term                                       | as above                      |
+
+Admin specs authenticate by loading a role's saved session — e.g. `test.use({ storageState: USERS.mentor.storageState })`.
+
+Most tests don't care which cycle is open and stay untagged. A test that needs the ad-hoc cycle carries `@ad-hoc` and runs in the second phase; `@long-term` is documentary for the rare test that needs the default. To iterate on an `@ad-hoc` test alone: `npm run env:cycle -- ad-hoc && npx playwright test --project=api_ad_hoc --no-deps`.
 
 ---
 
