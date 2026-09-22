@@ -32,7 +32,10 @@ export default defineConfig({
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 1 : undefined,
-	reporter: [["list"], ["html", { open: "never" }]],
+	// `github` adds a failure annotation per test to the Actions run summary.
+	reporter: process.env.CI
+		? [["list"], ["github"], ["html", { open: "never" }]]
+		: [["list"], ["html", { open: "never" }]],
 	use: {
 		trace: "on-first-retry",
 	},

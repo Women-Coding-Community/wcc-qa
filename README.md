@@ -81,6 +81,19 @@ Most tests don't care which cycle is open and stay untagged. A test that needs t
 
 ---
 
+## Nightly run (GitHub Actions)
+
+[.github/workflows/nightly.yml](.github/workflows/nightly.yml) runs the whole suite every night at
+02:00 UTC against a fresh stack: it checks out wcc-backend next to this repo, builds and seeds the
+QA Docker stack (backend + admin portal; the public website is skipped), and runs `npm test` — the
+base phase, then the `@ad-hoc` phase. Failing tests appear as annotations on the run; the HTML
+report is attached as an artifact for 7 days.
+
+Run it by hand from **Actions → Nightly → Run workflow** to pick a suite (`all` / `api` / `admin`)
+or a wcc-backend branch — handy to check a backend feature branch against the suite before it merges.
+
+---
+
 ## Linting & Formatting
 
 Code style is enforced by **ESLint** (with `typescript-eslint` and `eslint-plugin-playwright`) and **Prettier**. The two are kept conflict-free via `eslint-config-prettier`.
