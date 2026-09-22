@@ -11,9 +11,6 @@
 name: Nightly
 
 on:
-  push:
-    branches:
-      - 14/github_actions
   schedule:
     - cron: "0 2 * * *" # 02:00 UTC, every day
   workflow_dispatch:
