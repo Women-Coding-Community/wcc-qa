@@ -42,6 +42,7 @@ tests/
     .auth/               — Saved per-role sessions (gitignored)
 
 playwright.config.ts     — Two phases: base (setup → admin, api) then ad-hoc (setup_ad_hoc → api_ad_hoc, admin_ad_hoc → restore_cycle)
+.github/workflows/nightly.yml — Nightly: builds the wcc-backend QA stack on the runner and runs `npm test`; manual runs pick a suite / backend branch
 ```
 
 **Mentorship cycles:** the Docker stack has one database, so only one mentorship cycle is open at a time — `npm run env:up` seeds long-term. `playwright.config.ts` therefore runs two phases: the **base phase** (`api`, `admin`) runs every test _not_ tagged `@ad-hoc` against the seeded long-term cycle; then `setup_ad_hoc` switches the stack (`switchCycle()` → wcc-backend's `app-stack.sh cycle`, needs Docker + the checkout) and the **ad-hoc phase** (`api_ad_hoc`, `admin_ad_hoc`) runs only `@ad-hoc` tests; `restore_cycle` switches back. Tests never switch the cycle themselves. Most tests are cycle-agnostic and stay untagged; a test that needs the ad-hoc cycle carries `@ad-hoc`; `@long-term` is documentary for the rare test that needs the default (e.g. `CYCLE-08`). If a base-phase test fails, Playwright skips the ad-hoc phase.
