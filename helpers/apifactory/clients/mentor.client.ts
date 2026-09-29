@@ -13,6 +13,10 @@ export class MentorClient {
 		return this.request.get(PlatformEndpoints.MENTORS);
 	}
 
+	getById(id: number | string): Promise<APIResponse> {
+		return this.request.get(`${PlatformEndpoints.MENTORS}/${id}`);
+	}
+
 	accept(id: number): Promise<APIResponse> {
 		return this.request.patch(`${PlatformEndpoints.MENTORS}/${id}/accept`);
 	}

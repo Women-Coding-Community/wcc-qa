@@ -20,3 +20,14 @@ export const loginResponseSchema = z.object({
 });
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
+
+/**
+ * Shape returned by `GET /api/auth/me`. `member.id` is required here because the
+ * endpoint always resolves the authenticated account to a member record.
+ */
+export const meResponseSchema = z.object({
+	roles: z.array(roleTypeSchema).min(1),
+	member: memberDtoSchema.extend({ id: z.number() }),
+});
+
+export type MeResponse = z.infer<typeof meResponseSchema>;

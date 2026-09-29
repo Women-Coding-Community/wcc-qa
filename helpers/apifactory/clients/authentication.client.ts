@@ -13,6 +13,10 @@ export class AuthenticationClient {
 		return this.request.post(AuthEndpoints.LOGIN, { data });
 	}
 
+	me(): Promise<APIResponse> {
+		return this.request.get(AuthEndpoints.ME);
+	}
+
 	getUsers(): Promise<APIResponse> {
 		return this.request.get(AuthEndpoints.USERS);
 	}

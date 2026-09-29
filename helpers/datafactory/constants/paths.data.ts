@@ -34,6 +34,13 @@ export enum PlatformEndpoints {
 	MEMBERS = "/api/platform/v1/members",
 }
 
+/** Mentorship admin endpoints (ADMIN / MENTORSHIP_ADMIN only) */
+export enum MentorshipAdminEndpoints {
+	CYCLES = "/api/platform/v1/admin/mentorship/cycles",
+	CYCLES_ALL = "/api/platform/v1/admin/mentorship/cycles/all",
+	CYCLE_CURRENT = "/api/platform/v1/admin/mentorship/cycles/current",
+}
+
 /** Auth endpoints */
 export enum AuthEndpoints {
 	LOGIN = "/api/auth/login",
