@@ -47,20 +47,14 @@ row in that file, added in the same change.
 
 ## Getting the tests running
 
-Before making changes, make sure the suite runs on your machine. The
-[README](README.md) covers this in full — in short:
+Before making changes, make sure the suite runs on your machine.
+[Local setup](docs/README.md) covers the local stack in full — in short:
 
 ```bash
 npm install
 npx playwright install          # browsers, needed for the admin/UI project
+npm run env:up                  # start the application stack, seeded
 cp tests/.env.example tests/.env
-```
-
-Fill in `tests/.env` with the API host, API key and role credentials, then check everything
-is wired up:
-
-```bash
-npm run typecheck
 npm run test:api
 ```
 
