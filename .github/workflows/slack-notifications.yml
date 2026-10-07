@@ -1,0 +1,145 @@
+# Posts repository activity to the team's Slack channel: new pull requests, new issues, and
+# new comments on either. Messages go to a Slack incoming webhook stored as the
+# SLACK_WEBHOOK_URL repository secret; without it the job skips, so forks stay green.
+#
+# pull_request_target (not pull_request) so pull requests from forks can read the secret.
+# That is safe here because the job never checks out or runs the pull request's code — it only
+# reads the event payload. Titles and comment bodies are untrusted input, so they reach Slack
+# through jq, never through ${{ }} interpolation into the shell.
+name: Slack notifications
+
+on:
+  pull_request_target:
+    types: [opened]
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Post to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL is not set; skipping."
+            exit 0
+          fi
+
+          # Builds a Slack attachment (coloured bar, linked title, preview, fields, footer) from
+          # the event payload. Issue-form and PR-template boilerplate is dropped from the preview,
+          # and issue-form dropdown answers are shown as fields instead.
+          jq -c '
+            def esc: gsub("&"; "&amp;") | gsub("<"; "&lt;") | gsub(">"; "&gt;");
+            def user: "<\(.html_url)|\(.login | esc)>";
+            def names: map(.login // .name) | join(", ");
+
+            ["Affected area", "Test type"] as $formFields
+            | ["Is there an existing issue for this?"] as $skipSections
+
+            # Splits Markdown into sections, one per heading, keeping only the lines people wrote.
+            | def sections:
+                (. // "") | gsub("\r"; "") | gsub("<!--[\\s\\S]*?-->"; "") | split("\n")
+                | reduce .[] as $line ([{heading: null, lines: []}];
+                    if ($line | test("^#{1,6}\\s")) then
+                      . + [{heading: ($line | sub("^#{1,6}\\s+"; "") | sub("\\s+$"; "")), lines: []}]
+                    else
+                      .[-1].lines += [$line]
+                    end)
+                | map(.lines |= map(
+                    select(test("^\\s*[-*] \\[ \\]|^\\s*```") | not)
+                    | sub("^\\s*[-*] \\[[xX]\\]\\s*"; "☑ ")
+                    | select(. != "_No response_" and test("\\S"))));
+
+            # First ~300 characters of a body: headings in bold, cut on the last line with "…".
+            def preview:
+                sections
+                | map(select((.heading | IN($formFields[], $skipSections[]) | not) and (.lines | length) > 0))
+                | map((if .heading then [{text: .heading, bold: true}] else [] end) + (.lines | map({text: ., bold: false})))
+                | add // []
+                | reduce .[] as $line ({out: [], used: 0, full: false};
+                    if .full then .
+                    elif .used + ($line.text | length) > 300 then
+                      (300 - .used) as $room
+                      | .out += [$line + {text: ($line.text | .[0:$room] + "…")}] | .full = true
+                    else
+                      .out += [$line] | .used += ($line.text | length) + 1
+                    end)
+                | .out
+                | map(.text | esc | gsub("\\*\\*(?<t>[^*]+)\\*\\*"; "*\(.t)*") | gsub("\\*\\*"; "")) as $texts
+                | [.[] | .bold] as $bold
+                | [range(0; $texts | length) | if $bold[.] then "*\($texts[.])*" else $texts[.] end]
+                | join("\n");
+
+            def formfields:
+                sections
+                | map(select(.heading | IN($formFields[])) | select((.lines | length) > 0)
+                    | {title: .heading, value: (.lines[0] | esc), short: true});
+
+            def field($title; $value): if $value == "" then empty else {title: $title, value: ($value | esc), short: true} end;
+
+            .repository.full_name as $repo
+            | if .comment then
+                (if .issue.pull_request then "pull request" else "issue" end) as $kind
+                | {
+                    header: "New comment by \(.comment.user | user) on \($kind)",
+                    color: "#6E7781",
+                    title: "#\(.issue.number) \(.issue.title)",
+                    link: .comment.html_url,
+                    body: (.comment.body | preview),
+                    fields: [],
+                    created: .comment.created_at
+                  }
+              elif .pull_request then
+                .pull_request as $pr
+                | {
+                    header: "Pull request opened by \($pr.user | user)",
+                    color: "#0969DA",
+                    title: "#\($pr.number) \($pr.title)",
+                    link: $pr.html_url,
+                    body: ($pr.body | preview),
+                    fields: [
+                      {title: "Branch", value: "`\($pr.head.ref | esc) → \($pr.base.ref | esc)`", short: true},
+                      field("Reviewers"; ($pr.requested_reviewers + $pr.requested_teams) | names),
+                      field("Labels"; $pr.labels | map(.name) | join(", "))
+                    ],
+                    created: $pr.created_at
+                  }
+              else
+                .issue as $issue
+                | ($issue.labels | map(.name)) as $labels
+                | {
+                    header: "Issue opened by \($issue.user | user)",
+                    # Bugs get a red bar so they stand out.
+                    color: (if ($labels | index("bug")) or ($issue.title | test("^bug:"; "i")) then "#CF222E" else "#1F883D" end),
+                    title: "#\($issue.number) \($issue.title)",
+                    link: $issue.html_url,
+                    body: ($issue.body | preview),
+                    fields: ([field("Labels"; $labels | join(", ")), field("Assignees"; $issue.assignees | names)] + ($issue.body | formfields)),
+                    created: $issue.created_at
+                  }
+              end
+            | {
+                text: .header,
+                attachments: [{
+                  color: .color,
+                  title: (.title | esc),
+                  title_link: .link,
+                  text: .body,
+                  fields: .fields,
+                  footer: $repo,
+                  footer_icon: "https://github.githubassets.com/favicons/favicon.png",
+                  ts: (.created | fromdateiso8601),
+                  mrkdwn_in: ["text", "fields"]
+                }]
+              }
+          ' "$GITHUB_EVENT_PATH" \
+            | curl --fail --silent --show-error -X POST \
+                -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
