@@ -48,17 +48,10 @@ row in that file, added in the same change.
 ## Getting the tests running
 
 Before making changes, make sure the suite runs on your machine.
-[Local setup](docs/README.md) covers the local stack in full — in short:
+[Local setup](docs/README.md) walks you through it — clone the repos, start the stack with
+`npm run env:up`, then run the tests.
 
-```bash
-npm install
-npx playwright install          # browsers, needed for the admin/UI project
-npm run env:up                  # start the application stack, seeded
-cp tests/.env.example tests/.env
-npm run test:api
-```
-
-`tests/.env` is git-ignored and must stay that way. **Never commit real credentials.**
+`tests/.env` is git-ignored. Keep it that way — never commit real credentials.
 
 New tests are expected to follow the existing layering — clients, services and fixtures. The
 [API Architecture](README.md#api-architecture) section of the README explains it in full, and

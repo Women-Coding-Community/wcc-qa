@@ -3,7 +3,7 @@
 One command starts the whole platform — database, mail catcher, backend API, admin portal and
 website — already wired together and seeded with test data.
 
-Steps 1–4 get you from nothing to passing tests. Everything after that is reference — dip in
+Steps 1–4 get you from nothing to passing tests. Everything after that is reference. Dip in
 when you need it.
 
 ## 1. Install the prerequisites
@@ -22,8 +22,8 @@ git clone https://github.com/Women-Coding-Community/wcc-qa.git
 git clone https://github.com/Women-Coding-Community/wcc-backend.git
 ```
 
-The stack also builds the public website from `wcc-frontend`. No test touches the website, so
-you can skip cloning it — **pick one**:
+The stack also builds the public website from `wcc-frontend`. The test suite does not test
+the website, so you can skip cloning it — **pick one**:
 
 - **Clone it** next to the other two:
 
