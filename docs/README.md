@@ -3,57 +3,102 @@
 One command starts the whole platform — database, mail catcher, backend API, admin portal and
 website — already wired together and seeded with test data.
 
-The first three sections take you from nothing to a passing test run. Everything after that is
-reference; come back to it when you need it.
+Steps 1–4 get you from nothing to passing tests. Everything after that is reference — dip in
+when you need it.
 
-## Before you start
+## 1. Install the prerequisites
 
 - **Docker Desktop**, running. `docker ps` must succeed.
-- **Node.js and npm**, for the suite itself.
+- **Node.js and npm**, for the test suite.
 - Ports `8080`, `3000`, `3001`, `5432`, `1025` and `8025` free.
-- **Three repositories checked out side by side.** The stack scripts find each other by
-  relative path, so the layout matters:
 
-```
-your-projects/
-├── wcc-qa          ← this repository
-├── wcc-backend     ← owns the Docker stack
-└── wcc-frontend    ← the public website
-```
+## 2. Get the code
 
-If you would rather not clone the website, build it straight from GitHub instead:
+The stack lives in `wcc-backend`, and the scripts expect it next to this repository:
 
 ```bash
-WCC_FRONTEND_CONTEXT=https://github.com/Women-Coding-Community/wcc-frontend.git npm run env:up
+mkdir wcc && cd wcc
+git clone https://github.com/Women-Coding-Community/wcc-qa.git
+git clone https://github.com/Women-Coding-Community/wcc-backend.git
 ```
 
-## Start the stack
+The stack also builds the public website from `wcc-frontend`. No test touches the website, so
+you can skip cloning it — **pick one**:
+
+- **Clone it** next to the other two:
+
+  ```bash
+  git clone https://github.com/Women-Coding-Community/wcc-frontend.git
+  ```
+
+- **Or build it straight from GitHub** — add this to your shell profile (`~/.zshrc`,
+  `~/.bashrc`) so every `env:*` command picks it up:
+
+  ```bash
+  export WCC_FRONTEND_CONTEXT=https://github.com/Women-Coding-Community/wcc-frontend.git
+  ```
+
+You should end up with:
+
+```
+wcc/
+├── wcc-qa
+├── wcc-backend
+└── wcc-frontend   ← only if you cloned it
+```
+
+## 3. Start the stack
+
+From `wcc-qa`:
 
 ```bash
+cd wcc-qa
+npm install
 npm run env:up
 ```
 
-The first run builds the images, which takes around five to ten minutes. It starts every
-service, waits until each one is healthy, then seeds the database. Later runs reuse the
-images and are quicker.
+The first run builds the images, which takes around five to ten minutes. It starts everything,
+waits for each service to be ready, then seeds the database. Later runs reuse the images and
+are quicker.
 
-## Point the test suite at it
+**Check it worked** — log in as the seeded admin:
 
 ```bash
-npm install
-npx playwright install     # browsers, needed for the admin project
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' -H 'X-API-KEY: local' \
+  -d '{"email":"admin@wcc.dev","password":"wcc-admin"}'
+```
+
+If you get a `token` back, the backend is up and seeded. You can also open the admin portal at
+`http://localhost:3000` and sign in with the same account.
+
+## 4. Run the tests
+
+```bash
 cp tests/.env.example tests/.env
+```
+
+`tests/.env.example` already holds the local stack's values, so you just copy it. Nothing to
+fill in.
+
+> `tests/.env` is git-ignored. Keep it that way — never commit real credentials. The values in
+> `.env.example` are the stack's public development defaults, not secrets.
+
+Then run either the API tests for a quick check:
+
+```bash
+npm run test:api
+```
+
+Or the full suite. That one needs a browser, so install it first:
+
+```bash
+npx playwright install     # webkit, for the admin project
 npm test
 ```
 
-`tests/.env.example` already holds the local stack's values, so copying it is enough — there is
-nothing to fill in.
-
-> `tests/.env` is git-ignored and must stay that way. Real credentials must never be committed.
-> The values in `.env.example` are the stack's public development defaults, not secrets.
-
-`npm test` runs the suite in two phases: everything untagged against the seeded long-term
-cycle, then the `@ad-hoc` tests, which switch the stack to an ad-hoc cycle and switch it back
+`npm test` runs in two phases. First everything untagged, against the seeded long-term cycle.
+Then the `@ad-hoc` tests, which switch the stack to an ad-hoc cycle and switch it back
 afterwards.
 
 ---
@@ -68,8 +113,8 @@ afterwards.
 | Website      | `http://localhost:3001`                       |
 | MailHog      | `http://localhost:8025`                       |
 
-Outgoing email is captured by MailHog rather than sent, so password-reset and notification
-flows can be exercised safely.
+MailHog catches outgoing email instead of sending it, so you can test password resets and
+notifications safely.
 
 ## What gets seeded
 
@@ -84,14 +129,16 @@ Six accounts, all with the password `wcc-admin`:
 | `mentor-adhoc@wcc.dev`     | `MENTOR`           | Ad-hoc mentor                     |
 | `member@wcc.dev`           | `VIEWER`           |                                   |
 
-`tests/.env` carries four of these — admin, leader, mentor and mentorship-admin — one pair per
-role fixture.
+`tests/.env` uses four of them — admin, leader, mentor and mentorship-admin — one pair per role
+fixture.
 
-The seed also creates the `MENTORS` CMS page, without which the mentors endpoint serves a
-static fallback and lists no mentors, and opens one **mentorship cycle**. The default scenario
-is `long-term`; see [Everyday commands](#everyday-commands) to switch it.
+The seed also creates the `MENTORS` CMS page. Without it, the mentors endpoint falls back to a
+static file and shows no mentors.
 
-These accounts and their plaintext passwords are for local use only.
+It opens one **mentorship cycle** too. The default is `long-term`; see
+[Everyday commands](#everyday-commands) to switch it.
+
+These accounts only exist in your local stack.
 
 ## Everyday commands
 
@@ -102,7 +149,7 @@ These accounts and their plaintext passwords are for local use only.
 | `npm run env:purge` | Stop and delete the database volume, then start fresh    |
 | `npm run env:cycle` | Switch which mentorship cycle is open, without reseeding |
 
-For anything beyond that, call the script directly from your `wcc-backend` checkout:
+For anything else, call the script directly from your `wcc-backend` checkout:
 
 ```bash
 ./scripts/app-stack.sh up --no-seed          # start without creating the seeded accounts
@@ -113,7 +160,7 @@ For anything beyond that, call the script directly from your `wcc-backend` check
 ./scripts/app-stack.sh --help                # every command and flag
 ```
 
-**When something is wrong:**
+**When something goes wrong:**
 
 | Symptom                                        | Fix                                                                      |
 | ---------------------------------------------- | ------------------------------------------------------------------------ |
