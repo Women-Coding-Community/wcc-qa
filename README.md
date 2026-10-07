@@ -24,7 +24,7 @@ npx playwright install
 cp tests/.env.example tests/.env
 ```
 
-Setup guides for the backend, admin portal and frontend are in [`docs/`](docs/README.md).
+Running the application locally is covered in [`docs/`](docs/README.md).
 
 ### Environment variables
 
@@ -43,7 +43,7 @@ Tests read configuration from **`tests/.env`**. [`tests/.env.example`](tests/.en
 
 ## Running Tests
 
-The suites run against the local Docker stack (see _Local Setup_ in [CONTRIBUTING.md](CONTRIBUTING.md)).
+The suites run against the local Docker stack — see [Local setup](docs/README.md).
 
 ```bash
 npm test                  # everything: base phase, then the @ad-hoc phase (Docker + wcc-backend checkout)

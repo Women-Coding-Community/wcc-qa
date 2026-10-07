@@ -47,24 +47,11 @@ row in that file, added in the same change.
 
 ## Getting the tests running
 
-Before making changes, make sure the suite runs on your machine. The
-[README](README.md) covers this in full — in short:
+Before making changes, make sure the suite runs on your machine.
+[Local setup](docs/README.md) walks you through it — clone the repos, start the stack with
+`npm run env:up`, then run the tests.
 
-```bash
-npm install
-npx playwright install          # browsers, needed for the admin/UI project
-cp tests/.env.example tests/.env
-```
-
-Fill in `tests/.env` with the API host, API key and role credentials, then check everything
-is wired up:
-
-```bash
-npm run typecheck
-npm run test:api
-```
-
-`tests/.env` is git-ignored and must stay that way. **Never commit real credentials.**
+`tests/.env` is git-ignored. Keep it that way — never commit real credentials.
 
 New tests are expected to follow the existing layering — clients, services and fixtures. The
 [API Architecture](README.md#api-architecture) section of the README explains it in full, and

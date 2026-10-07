@@ -1,36 +1,176 @@
-# Setup guides
+# Local setup
 
-How to run each part of the WCC platform locally, so you can point the test suite at it.
+One command starts the whole platform — database, mail catcher, backend API, admin portal and
+website — already wired together and seeded with test data.
 
-Each guide is a QA-focused on-ramp. It covers what a tester needs to stand the component up
-and links to that component's own repository for prerequisites, install and anything deeper.
+Steps 1–4 get you from nothing to passing tests. Everything after that is reference. Dip in
+when you need it.
 
-| Component    | Repository                                                                           | Runs on                 | Guide                                          |
-| ------------ | ------------------------------------------------------------------------------------ | ----------------------- | ---------------------------------------------- |
-| Backend API  | [`wcc-backend`](https://github.com/Women-Coding-Community/wcc-backend)               | `http://localhost:8080` | [setup-backend.md](setup-backend.md)           |
-| Admin portal | [`wcc-backend/admin-wcc-app`](https://github.com/Women-Coding-Community/wcc-backend) | `http://localhost:3000` | [setup-admin-portal.md](setup-admin-portal.md) |
-| Frontend     | [`wcc-frontend`](https://github.com/Women-Coding-Community/wcc-frontend)             | `http://localhost:3000` | [setup-frontend.md](setup-frontend.md)         |
+## 1. Install the prerequisites
 
-Start with the backend — everything calls it, and it seeds the accounts the other two log in
-with. Add the admin portal when you run the `admin` Playwright project, and the frontend when
-you work on the website UI.
+- **Docker Desktop**, running. `docker ps` must succeed.
+- **Node.js and npm**, for the test suite.
+- Ports `8080`, `3000`, `3001`, `5432`, `1025` and `8025` free.
 
-## How the suite connects to a local stack
+## 2. Get the code
 
-With the QA backend stack running, every value in [`tests/.env`](../tests/.env.example) comes
-from a local component. The exact block to paste is in
-[setup-backend.md](setup-backend.md#point-the-suite-at-it).
-
-## Ports
-
-The admin portal and the frontend both default to port `3000`. Keep the admin portal there and
-move the frontend:
+The stack lives in `wcc-backend`, and the scripts expect it next to this repository:
 
 ```bash
-pnpm dev -p 3001        # frontend
+mkdir wcc && cd wcc
+git clone https://github.com/Women-Coding-Community/wcc-qa.git
+git clone https://github.com/Women-Coding-Community/wcc-backend.git
 ```
 
-The portal sends its requests to the backend straight from your browser, and the backend only
-accepts them from `http://localhost:3000`. Move the portal and login stops working. The
-frontend works differently — its requests go out from its own server rather than from your
-browser, so the port it runs on doesn't matter.
+The stack also builds the public website from `wcc-frontend`. The test suite does not test
+the website, so you can skip cloning it — **pick one**:
+
+- **Clone it** next to the other two:
+
+  ```bash
+  git clone https://github.com/Women-Coding-Community/wcc-frontend.git
+  ```
+
+- **Or build it straight from GitHub** — add this to your shell profile (`~/.zshrc`,
+  `~/.bashrc`) so every `env:*` command picks it up:
+
+  ```bash
+  export WCC_FRONTEND_CONTEXT=https://github.com/Women-Coding-Community/wcc-frontend.git
+  ```
+
+You should end up with:
+
+```
+wcc/
+├── wcc-qa
+├── wcc-backend
+└── wcc-frontend   ← only if you cloned it
+```
+
+## 3. Start the stack
+
+From `wcc-qa`:
+
+```bash
+cd wcc-qa
+npm install
+npm run env:up
+```
+
+The first run builds the images, which takes around five to ten minutes. It starts everything,
+waits for each service to be ready, then seeds the database. Later runs reuse the images and
+are quicker.
+
+**Check it worked** — log in as the seeded admin:
+
+```bash
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' -H 'X-API-KEY: local' \
+  -d '{"email":"admin@wcc.dev","password":"wcc-admin"}'
+```
+
+If you get a `token` back, the backend is up and seeded. You can also open the admin portal at
+`http://localhost:3000` and sign in with the same account.
+
+## 4. Run the tests
+
+```bash
+cp tests/.env.example tests/.env
+```
+
+`tests/.env.example` already holds the local stack's values, so you just copy it. Nothing to
+fill in.
+
+> `tests/.env` is git-ignored. Keep it that way — never commit real credentials. The values in
+> `.env.example` are the stack's public development defaults, not secrets.
+
+Then run either the API tests for a quick check:
+
+```bash
+npm run test:api
+```
+
+Or the full suite. That one needs a browser, so install it first:
+
+```bash
+npx playwright install     # webkit, for the admin project
+npm test
+```
+
+`npm test` runs in two phases. First everything untagged, against the seeded long-term cycle.
+Then the `@ad-hoc` tests, which switch the stack to an ad-hoc cycle and switch it back
+afterwards.
+
+---
+
+## What's running
+
+| Service      | URL                                           |
+| ------------ | --------------------------------------------- |
+| Backend API  | `http://localhost:8080`                       |
+| Swagger UI   | `http://localhost:8080/swagger-ui/index.html` |
+| Admin portal | `http://localhost:3000`                       |
+| Website      | `http://localhost:3001`                       |
+| MailHog      | `http://localhost:8025`                       |
+
+MailHog catches outgoing email instead of sending it, so you can test password resets and
+notifications safely.
+
+## What gets seeded
+
+Six accounts, all with the password `wcc-admin`:
+
+| Email                      | Role               | Notes                             |
+| -------------------------- | ------------------ | --------------------------------- |
+| `admin@wcc.dev`            | `ADMIN`            | Widest access; start here         |
+| `mentorship-admin@wcc.dev` | `MENTORSHIP_ADMIN` | Approves mentors, manages matches |
+| `leader@wcc.dev`           | `LEADER`           |                                   |
+| `mentor@wcc.dev`           | `MENTOR`           | Long-term mentor                  |
+| `mentor-adhoc@wcc.dev`     | `MENTOR`           | Ad-hoc mentor                     |
+| `member@wcc.dev`           | `VIEWER`           |                                   |
+
+`tests/.env` uses four of them — admin, leader, mentor and mentorship-admin — one pair per role
+fixture.
+
+The seed also creates the `MENTORS` CMS page. Without it, the mentors endpoint falls back to a
+static file and shows no mentors.
+
+It opens one **mentorship cycle** too. The default is `long-term`; see
+[Everyday commands](#everyday-commands) to switch it.
+
+These accounts only exist in your local stack.
+
+## Everyday commands
+
+| Command             | What it does                                             |
+| ------------------- | -------------------------------------------------------- |
+| `npm run env:up`    | Start everything and seed it                             |
+| `npm run env:down`  | Stop the containers, keep the data                       |
+| `npm run env:purge` | Stop and delete the database volume, then start fresh    |
+| `npm run env:cycle` | Switch which mentorship cycle is open, without reseeding |
+
+For anything else, call the script directly from your `wcc-backend` checkout:
+
+```bash
+./scripts/app-stack.sh up --no-seed          # start without creating the seeded accounts
+./scripts/app-stack.sh up --no-build         # skip the image rebuild
+./scripts/app-stack.sh cycle ad-hoc          # long-term | ad-hoc | both | none
+./scripts/app-stack.sh logs springboot-app   # follow one service
+./scripts/app-stack.sh ps                    # what is running
+./scripts/app-stack.sh --help                # every command and flag
+```
+
+**When something goes wrong:**
+
+| Symptom                                        | Fix                                                                      |
+| ---------------------------------------------- | ------------------------------------------------------------------------ |
+| A migration error stops the backend starting   | `npm run env:purge` — a clean, re-seeded database                        |
+| Port `5432` already in use by a local Postgres | `POSTGRES_PORT=5433 npm run env:up`                                      |
+| `Public frontend not found at …`               | Clone `wcc-frontend` beside `wcc-backend`, or set `WCC_FRONTEND_CONTEXT` |
+| Tests fail against the wrong cycle             | `./scripts/app-stack.sh cycle long-term` to get back to the default      |
+
+## Going deeper
+
+[`docs/qa_local_setup.md`](https://github.com/Women-Coding-Community/wcc-backend/blob/main/docs/qa_local_setup.md)
+in the backend repository covers the stack in full — authentication, how the seeding works,
+adding seeded data, and a longer troubleshooting table.
