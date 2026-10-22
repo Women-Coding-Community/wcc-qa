@@ -49,6 +49,7 @@ The suites run against the local Docker stack — see [Local setup](docs/README.
 npm test                  # everything: base phase, then the @ad-hoc phase (Docker + wcc-backend checkout)
 npm run test:api          # API tests — needs only the backend
 npm run test:admin        # admin UI tests — logs each role in first (setup project)
+npm run test:admin:smoke  # admin @smoke tests only — the pull request gate
 npm run test:api -- --grep @smoke
 
 npm run typecheck         # type-check without running tests
@@ -91,6 +92,13 @@ report is attached as an artifact for 7 days.
 
 Run it by hand from **Actions → Nightly → Run workflow** to pick a suite (`all` / `api` / `admin`)
 or a wcc-backend branch — handy to check a backend feature branch against the suite before it merges.
+
+## Pull request gate (GitHub Actions)
+
+[.github/workflows/pull-request.yml](.github/workflows/pull-request.yml) runs on every pull request
+to `main`. It builds and seeds the same stack as the nightly run and then runs
+`npm run test:admin:smoke`. The step has a 4-minute limit, so keep `@smoke` for the few tests that
+prove the admin portal works at all.
 
 ---
 
