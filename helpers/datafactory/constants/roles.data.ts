@@ -4,6 +4,8 @@ export enum Role {
 	LEADER = "leader",
 	MENTOR = "mentor",
 	MENTORSHIP_ADMIN = "mentorshipAdmin",
+	MEMBER = "member",
+	MENTOR_AD_HOC = "mentorAdHoc",
 }
 
 export interface USER {
@@ -41,5 +43,15 @@ export const USERS: Record<Role, USER> = {
 		email: getEnvVariable("LEADER_EMAIL"),
 		password: getEnvVariable("LEADER_PASSWORD"),
 		storageState: "tests/admin/.auth/leader.json",
+	},
+	[Role.MEMBER]: {
+		email: getEnvVariable("MEMBER_EMAIL"),
+		password: getEnvVariable("MEMBER_PASSWORD"),
+		storageState: "tests/admin/.auth/member.json",
+	},
+	[Role.MENTOR_AD_HOC]: {
+		email: getEnvVariable("MENTOR_AD_HOC_EMAIL"),
+		password: getEnvVariable("MENTOR_AD_HOC_PASSWORD"),
+		storageState: "tests/admin/.auth/mentor-adhoc.json",
 	},
 };
