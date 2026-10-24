@@ -1,0 +1,98 @@
+# Smoke gate for pull requests: runs the admin @smoke tests against a fresh copy of the
+# application stack, so a change that breaks login or the dashboard is caught before it merges.
+#
+# The stack is built the same way as in nightly.yml: wcc-backend is checked out next to this
+# repo, its QA Docker stack is built and seeded, and the tests use the public defaults from
+# tests/.env.example. No secrets are needed, so pull requests from forks run it as well.
+#
+# The API smoke gate (#54) is meant to run here too, as another step after the admin one.
+name: Pull request
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pull-request-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  BACKEND_REPO: Women-Coding-Community/wcc-backend
+  COMPOSE_FILE: docker/docker-compose.qa.yml
+  # Only validated by compose, never built here (no test needs the public website).
+  WCC_FRONTEND_CONTEXT: https://github.com/Women-Coding-Community/wcc-frontend.git
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out wcc-qa
+        uses: actions/checkout@v4
+        with:
+          path: wcc-qa
+
+      - name: Check out wcc-backend (owns the Docker stack)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BACKEND_REPO }}
+          ref: main
+          path: wcc-backend
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: wcc-qa/package-lock.json
+
+      - name: Install dependencies
+        working-directory: wcc-qa
+        run: npm ci
+
+      - name: Install Playwright browser (admin project runs on Desktop Safari)
+        working-directory: wcc-qa
+        run: npx playwright install --with-deps webkit
+
+      - name: Build the stack images
+        working-directory: wcc-backend
+        run: docker compose --file "$COMPOSE_FILE" build springboot-app admin-app seed
+
+      - name: Start the stack
+        working-directory: wcc-backend
+        run: |
+          docker compose --file "$COMPOSE_FILE" up --detach postgres mailhog springboot-app
+
+          # Spring Boot can need longer than the compose healthcheck allows on a shared runner,
+          # so wait for the backend here; Docker flips it back to healthy on the next probe.
+          for _ in $(seq 1 60); do
+            [ "$(docker inspect --format '{{.State.Health.Status}}' springboot-app)" = healthy ] && break
+            sleep 5
+          done
+          docker inspect --format '{{.State.Health.Status}}' springboot-app | grep -q healthy
+
+          docker compose --file "$COMPOSE_FILE" up --detach --wait admin-app
+
+      - name: Seed the QA accounts and the mentorship cycle
+        working-directory: wcc-backend
+        run: scripts/app-stack.sh seed
+
+      - name: Configure the tests for the local stack
+        working-directory: wcc-qa
+        run: cp tests/.env.example tests/.env
+
+      - name: Admin smoke tests
+        working-directory: wcc-qa
+        timeout-minutes: 4
+        run: npm run test:admin:smoke
+
+      - name: Show stack logs on failure
+        if: failure()
+        working-directory: wcc-backend
+        run: |
+          docker compose --file "$COMPOSE_FILE" ps
+          docker compose --file "$COMPOSE_FILE" logs --tail 200 springboot-app admin-app

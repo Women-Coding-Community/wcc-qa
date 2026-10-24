@@ -4,7 +4,7 @@ import { USERS, Role } from "helpers/datafactory/constants/roles.data";
 
 test.use({ storageState: USERS[Role.MENTOR].storageState });
 
-test.describe("Dashboard Page Test", () => {
+test.describe("ADMIN-DASH-01: Dashboard", () => {
 	test("Dashboard loads after navigating to root", { tag: "@smoke" }, async ({ page, loginPage }) => {
 		await loginPage.navigateToURL("/");
 
