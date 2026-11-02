@@ -48,6 +48,12 @@ export enum AuthEndpoints {
 	USERS = "/api/auth/users",
 }
 
+/** Admin portal routes — relative to ADMIN_BASE_URL, not API_HOST. */
+export enum AdminRoutes {
+	MENTEES = "/admin/mentees",
+	USERS = "/admin/users",
+}
+
 /** MailHog endpoints — relative to MAILHOG_HOST, not API_HOST. v2 reads, v1 deletes (v2 has no delete). */
 export enum MailHogEndpoints {
 	MESSAGES = "/api/v2/messages",

@@ -16,7 +16,8 @@ export class LoginPage extends BasePage {
 		this.emailInput = page.getByRole("textbox", { name: "Email" });
 		this.passwordInput = page.getByRole("textbox", { name: "Password" });
 		this.signInButton = page.getByRole("button", { name: "Sign In" });
-		this.errorAlert = page.getByRole("alert");
+		// Next.js renders its route announcer with role="alert" too; exclude it so this matches the form error only.
+		this.errorAlert = page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"));
 	}
 
 	async login(email: string, password: string): Promise<void> {
