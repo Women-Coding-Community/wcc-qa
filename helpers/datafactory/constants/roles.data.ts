@@ -3,6 +3,7 @@ export enum Role {
 	ADMIN = "admin",
 	LEADER = "leader",
 	MENTOR = "mentor",
+	MENTEE = "mentee",
 	MENTORSHIP_ADMIN = "mentorshipAdmin",
 	MEMBER = "member",
 	MENTOR_AD_HOC = "mentorAdHoc",
@@ -38,6 +39,11 @@ export const USERS: Record<Role, USER> = {
 		email: getEnvVariable("MENTOR_EMAIL"),
 		password: getEnvVariable("MENTOR_PASSWORD"),
 		storageState: "tests/admin/.auth/mentor.json",
+	},
+	[Role.MENTEE]: {
+		email: getEnvVariable("MENTEE_EMAIL"),
+		password: getEnvVariable("MENTEE_PASSWORD"),
+		storageState: "tests/admin/.auth/mentee.json",
 	},
 	[Role.LEADER]: {
 		email: getEnvVariable("LEADER_EMAIL"),

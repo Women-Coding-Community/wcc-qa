@@ -11,7 +11,7 @@ import { INVALID_TOKEN } from "helpers/datafactory/constants/auth.data";
  *   authApi          X-API-KEY only            public / registration endpoints
  *   noApiKeyApi      no headers at all         asserting the API-key filter
  *   invalidTokenApi  X-API-KEY + unknown token asserting rejected sessions
- *   <role>Api        X-API-KEY + role's token  adminApi, leaderApi, mentorApi, mentorshipAdminApi, memberApi, mentorAdHocApi
+ *   <role>Api        X-API-KEY + role's token  adminApi, leaderApi, mentorApi, menteeApi, mentorshipAdminApi, memberApi, mentorAdHocApi
  *   apiForRole(role) same, for role-matrix tests
  *   mailhog          no headers, MAILHOG_HOST  email delivery assertions (not an APIService: different host)
  *
@@ -27,6 +27,7 @@ type TestFixtures = {
 	adminApi: APIService;
 	leaderApi: APIService;
 	mentorApi: APIService;
+	menteeApi: APIService;
 	mentorshipAdminApi: APIService;
 	memberApi: APIService;
 	mentorAdHocApi: APIService;
@@ -115,6 +116,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 	adminApi: async ({ apiForRole }, use) => use(await apiForRole(Role.ADMIN)),
 	leaderApi: async ({ apiForRole }, use) => use(await apiForRole(Role.LEADER)),
 	mentorApi: async ({ apiForRole }, use) => use(await apiForRole(Role.MENTOR)),
+	menteeApi: async ({ apiForRole }, use) => use(await apiForRole(Role.MENTEE)),
 	mentorshipAdminApi: async ({ apiForRole }, use) => use(await apiForRole(Role.MENTORSHIP_ADMIN)),
 	memberApi: async ({ apiForRole }, use) => use(await apiForRole(Role.MEMBER)),
 	mentorAdHocApi: async ({ apiForRole }, use) => use(await apiForRole(Role.MENTOR_AD_HOC)),

@@ -79,3 +79,15 @@ test.describe("AUTH-08: Request without API key", () => {
 		expect(response.status()).toBe(401);
 	});
 });
+
+test.describe("AUTH-09: Every seeded role can log in", () => {
+	for (const role of Object.values(Role)) {
+		test(`Get current user with ${role} token returns role's account`, { tag: "@smoke" }, async ({ apiForRole }) => {
+			const api = await apiForRole(role);
+			const response = await api.authentication.me(true);
+
+			const { member } = meResponseSchema.parse(await response.json());
+			expect(member.email).toBe(USERS[role].email);
+		});
+	}
+});

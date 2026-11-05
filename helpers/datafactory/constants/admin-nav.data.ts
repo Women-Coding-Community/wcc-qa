@@ -9,6 +9,7 @@ export const NAV_LINKS: Record<Role, readonly string[]> = {
 	[Role.MENTORSHIP_ADMIN]: ["Dashboard", "Mentors", "Members", "Mentees", "Mentorship", "Cycles"],
 	[Role.LEADER]: ["Dashboard", "Mentors", "Members", "Users"],
 	[Role.MENTOR]: ["Dashboard", "Mentor Dashboard", "My Profile"],
+	[Role.MENTEE]: ["Dashboard"],
 	[Role.MENTOR_AD_HOC]: ["Dashboard", "Mentor Dashboard", "My Profile"],
 	[Role.MEMBER]: ["Dashboard"],
 };
