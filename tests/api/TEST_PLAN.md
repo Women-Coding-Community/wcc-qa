@@ -4,18 +4,17 @@
 
 **File:** `tests/api/tests/auth/auth.flow.spec.ts`
 
-| ID      | Title                                               | Endpoint               | Expected Result                                        |
-| ------- | --------------------------------------------------- | ---------------------- | ------------------------------------------------------ |
-| AUTH-01 | Login with valid credentials returns token          | `POST /api/auth/login` | 200, body contains `token`, `expiresAt`, `roles`       |
-| AUTH-02 | Login with missing email and password returns 400   | `POST /api/auth/login` | 400 (`@NotNull` validation; blank strings return 401)  |
-| AUTH-03 | Login with wrong password returns 401               | `POST /api/auth/login` | 401                                                    |
-| AUTH-04 | Get current user with valid token returns user info | `GET /api/auth/me`     | 200, `roles` contains the role, `member.email` matches |
-| AUTH-05 | Get current user without token returns 401          | `GET /api/auth/me`     | 401                                                    |
-| AUTH-06 | Get current user with invalid token returns 401     | `GET /api/auth/me`     | 401                                                    |
-| AUTH-07 | Get users with admin token returns user list        | `GET /api/auth/users`  | 200, non-empty list                                    |
-| AUTH-08 | Get current user without API key returns 401        | `GET /api/auth/me`     | 401                                                    |
-
----
+| ID      | Title                                                                      | Endpoint               | Expected Result                                           |
+| ------- | -------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------- |
+| AUTH-01 | Login with valid credentials returns token                                 | `POST /api/auth/login` | 200, body contains `token`, `expiresAt`, `roles`          |
+| AUTH-02 | Login with missing email and password returns 400                          | `POST /api/auth/login` | 400 (`@NotNull` validation; blank strings return 401)     |
+| AUTH-03 | Login with wrong password returns 401                                      | `POST /api/auth/login` | 401                                                       |
+| AUTH-04 | Get current user with valid token returns user info                        | `GET /api/auth/me`     | 200, `roles` contains the role, `member.email` matches    |
+| AUTH-05 | Get current user without token returns 401                                 | `GET /api/auth/me`     | 401                                                       |
+| AUTH-06 | Get current user with invalid token returns 401                            | `GET /api/auth/me`     | 401                                                       |
+| AUTH-07 | Get users with admin token returns user list                               | `GET /api/auth/users`  | 200, non-empty list                                       |
+| AUTH-08 | Get current user without API key returns 401                               | `GET /api/auth/me`     | 401                                                       |
+| AUTH-09 | Get current user with each seeded role's token returns that role's account | `GET /api/auth/me`     | 200, `member.email` matches the role's account in `USERS` |
 
 ## Flow 2: Mentor — Register and Accept
 
