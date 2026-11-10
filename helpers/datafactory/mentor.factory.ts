@@ -1,8 +1,24 @@
 import { faker } from "@faker-js/faker";
+import { Month } from "helpers/datafactory/constants/cycle.data";
+import { MIN_LONG_TERM_HOURS_PER_MENTEE } from "helpers/datafactory/constants/mentor.data";
 
 export type MentorPayload = ReturnType<typeof buildMentorPayload>;
 
-export const buildMentorPayload = () => ({
+export type AdHocAvailability = { month: Month; hours: number };
+
+export interface MentorOffer {
+	longTerm?: boolean;
+	adHoc?: AdHocAvailability[];
+}
+
+export const buildLongTermCommitment = () => {
+	const numMentee = faker.number.int({ min: 1, max: 3 });
+	return { numMentee, hours: numMentee * MIN_LONG_TERM_HOURS_PER_MENTEE };
+};
+
+export const buildAdHocAvailability = (month: Month, hours: number): AdHocAvailability[] => [{ month, hours }];
+
+export const buildMentorPayload = ({ longTerm = true, adHoc }: MentorOffer = {}) => ({
 	fullName: faker.person.fullName(),
 	email: faker.internet.email({ provider: "automation.test" }).toLowerCase(),
 	position: faker.person.jobTitle(),
@@ -18,5 +34,7 @@ export const buildMentorPayload = () => ({
 	},
 	menteeSection: {
 		idealMentee: faker.lorem.sentence(),
+		...(longTerm && { longTerm: buildLongTermCommitment() }),
+		...(adHoc && { adHoc }),
 	},
 });

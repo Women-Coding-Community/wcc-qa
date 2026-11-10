@@ -22,5 +22,21 @@ export const CYCLE_TYPE_OF_SCENARIO: Record<CycleScenario, CycleMentorshipType> 
 	[CycleScenario.AD_HOC]: CycleMentorshipType.AD_HOC,
 };
 
+/** Java `java.time.Month` names */
+export enum Month {
+	JANUARY = "JANUARY",
+	FEBRUARY = "FEBRUARY",
+	MARCH = "MARCH",
+	APRIL = "APRIL",
+	MAY = "MAY",
+	JUNE = "JUNE",
+	JULY = "JULY",
+	AUGUST = "AUGUST",
+	SEPTEMBER = "SEPTEMBER",
+	OCTOBER = "OCTOBER",
+	NOVEMBER = "NOVEMBER",
+	DECEMBER = "DECEMBER",
+}
+
 /** Upper bound for one `app-stack.sh cycle` run; the first call also builds the small seed image. */
 export const CYCLE_SWITCH_TIMEOUT_MS = 120_000;
