@@ -1,6 +1,24 @@
 import { z } from "zod";
+import { Month } from "helpers/datafactory/constants/cycle.data";
 
 export const profileStatusSchema = z.enum(["ACTIVE", "DISABLED", "BANNED", "PENDING", "REJECTED"]);
+
+export const menteeSectionSchema = z.object({
+	idealMentee: z.string(),
+	additional: z.string().optional().nullable(),
+	longTerm: z
+		.object({
+			numMentee: z.number(),
+			hours: z.number(),
+		})
+		.optional(),
+	adHoc: z.array(
+		z.object({
+			month: z.enum(Month),
+			hours: z.number(),
+		})
+	),
+});
 
 export const mentorResponseSchema = z.object({
 	id: z.number(),
@@ -37,10 +55,7 @@ export const mentorResponseSchema = z.object({
 		),
 		mentorshipFocus: z.array(z.string()),
 	}),
-	menteeSection: z.object({
-		idealMentee: z.string(),
-		additional: z.string().optional().nullable(),
-	}),
+	menteeSection: menteeSectionSchema,
 	city: z.string().optional().nullable(),
 	companyName: z.string().optional().nullable(),
 	pronouns: z.string().optional().nullable(),

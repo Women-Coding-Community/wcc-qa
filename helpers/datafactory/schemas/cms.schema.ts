@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { profileStatusSchema } from "./mentor.schema";
+import { profileStatusSchema, menteeSectionSchema } from "./mentor.schema";
 import { CycleMentorshipType } from "helpers/datafactory/constants/cycle.data";
 
 /**
@@ -12,6 +12,7 @@ export const cmsMentorSchema = z.object({
 	email: z.email(),
 	fullName: z.string(),
 	profileStatus: profileStatusSchema,
+	menteeSection: menteeSectionSchema,
 });
 
 /**
