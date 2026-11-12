@@ -1,7 +1,7 @@
 import { TypedAPIResponse, ensureSuccess as assertSuccess } from "../api.helper";
 import { MentorClient } from "../clients/mentor.client";
 import { MentorResponse, MentorSummary } from "helpers/datafactory/schemas/mentor.schema";
-import { buildMentorPayload } from "helpers/datafactory/mentor.factory";
+import { buildMentorPayload, buildRejectionReason } from "helpers/datafactory/mentor.factory";
 
 export class MentorService {
 	constructor(private readonly client: MentorClient) {}
@@ -29,6 +29,22 @@ export class MentorService {
 
 	async accept(id: number, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
 		const response = await this.client.accept(id);
+		if (ensureSuccess) assertSuccess(response);
+		return response;
+	}
+
+	/**	Rejects a mentor; the reason is generated here because no response returns it. */
+	async reject(id: number, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
+		const body = buildRejectionReason();
+		const response = await this.client.reject(id, body);
+		if (ensureSuccess) assertSuccess(response);
+		return response;
+	}
+
+	/** Updates a mentor with fresh faker data, keeping their email so the identity doesn't change. */
+	async update(id: number, email: string, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
+		const payload = { ...buildMentorPayload(), email };
+		const response = await this.client.update(id, payload);
 		if (ensureSuccess) assertSuccess(response);
 		return response;
 	}

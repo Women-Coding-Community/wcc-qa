@@ -8,3 +8,6 @@ export const NON_NUMERIC_MENTOR_ID = "not-a-number";
 
 /** Backend rule (MentorshipService.validateMentorCommitment): long-term hours / numMentee must be ≥ 2 */
 export const MIN_LONG_TERM_HOURS_PER_MENTEE = 2;
+
+/** Backend rule (MentorRejectionRequest): the rejection reason must be 1-250 characters. */
+export const MAX_REJECTION_REASON_LENGTH = 250;
