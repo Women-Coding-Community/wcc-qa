@@ -41,7 +41,7 @@ export class MentorService {
 		return response;
 	}
 
-	/** Updates a mentor with fresh faker data, keeping their email so the identity doesn't change. */
+	/** Updates a mentor with fresh Faker data, keeping their email so the identity doesn't change. */
 	async update(id: number, email: string, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
 		const payload = { ...buildMentorPayload(), email };
 		const response = await this.client.update(id, payload);
