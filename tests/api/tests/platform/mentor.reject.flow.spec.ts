@@ -48,3 +48,15 @@ test(
 		expect(after.mentors.find(m => m.id === mentorId)).toBeUndefined();
 	}
 );
+
+test(
+	"MENTOR-R03: Rejecting an already-rejected mentor returns 409",
+	{ tag: "@regression" },
+	async ({ mentorshipAdminApi }) => {
+		await mentorshipAdminApi.mentor.reject(mentorId!, true);
+
+		const response = await mentorshipAdminApi.mentor.reject(mentorId!);
+
+		expect(response.status()).toBe(409);
+	}
+);
