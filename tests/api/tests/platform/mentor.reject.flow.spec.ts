@@ -60,3 +60,17 @@ test(
 		expect(response.status()).toBe(409);
 	}
 );
+
+test(
+	"MENTOR-R04: Rejecting as a mentor returns 403 and leaves the mentor PENDING",
+	{ tag: "@regression" },
+	async ({ mentorApi, mentorshipAdminApi }) => {
+		const response = await mentorApi.mentor.reject(mentorId!);
+
+		expect(response.status()).toBe(403);
+
+		const after = await mentorshipAdminApi.mentor.getById(mentorId!, true);
+		const mentor = mentorResponseSchema.parse(await after.json());
+		expect(mentor.profileStatus).toBe("PENDING");
+	}
+);
