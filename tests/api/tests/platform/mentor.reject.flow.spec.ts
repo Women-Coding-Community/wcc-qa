@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 import { test } from "helpers/fixtures/common.fixtures";
 import { mentorResponseSchema } from "helpers/datafactory/schemas/mentor.schema";
 import { cmsMentorsPageSchema } from "helpers/datafactory/schemas/cms.schema";
+import { PlatformEndpoints } from "helpers/datafactory/constants/paths.data";
 
 let mentorId: number | undefined;
 
@@ -72,5 +73,18 @@ test(
 		const after = await mentorshipAdminApi.mentor.getById(mentorId!, true);
 		const mentor = mentorResponseSchema.parse(await after.json());
 		expect(mentor.profileStatus).toBe("PENDING");
+	}
+);
+
+// FIXME: backend accepts a blank reason with 200 - `@Valid` is missing on `@RequestBody` in
+// MentorController#rejectMentor, so MentorRejectionRequest's @NotBlank never runs. Unskip once fixed.
+test.skip(
+	"MENTOR-R05: Rejecting with a blank reason returns 400",
+	{ tag: "@regression" },
+	async ({ mentorshipAdminApi }) => {
+		const response = await mentorshipAdminApi.request.patch(`${PlatformEndpoints.MENTORS}/${mentorId}/reject`, {
+			data: { reason: "" },
+		});
+		expect(response.status()).toBe(400);
 	}
 );
