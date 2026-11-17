@@ -1,14 +1,19 @@
 import { TypedAPIResponse, ensureSuccess as assertSuccess } from "../api.helper";
 import { MentorClient } from "../clients/mentor.client";
 import { MentorResponse, MentorSummary } from "helpers/datafactory/schemas/mentor.schema";
-import { buildMentorPayload, buildRejectionReason } from "helpers/datafactory/mentor.factory";
+import { buildMentorPayload, buildRejectionReason, MentorOffer } from "helpers/datafactory/mentor.factory";
 
 export class MentorService {
 	constructor(private readonly client: MentorClient) {}
 
 	/** Registers a mentor with a dynamic Faker payload built in the method body. */
 	async register(ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
-		const payload = buildMentorPayload();
+		return this.registerWithOffer({}, ensureSuccess);
+	}
+
+	/** Registers a mentor offering the given mentorship types (default: long-term only) */
+	async registerWithOffer(offer: MentorOffer, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
+		const payload = buildMentorPayload(offer);
 		const response = await this.client.register(payload);
 		if (ensureSuccess) assertSuccess(response);
 		return response;
