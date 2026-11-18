@@ -1,7 +1,12 @@
 import { TypedAPIResponse, ensureSuccess as assertSuccess } from "../api.helper";
 import { MentorClient } from "../clients/mentor.client";
 import { MentorResponse, MentorSummary } from "helpers/datafactory/schemas/mentor.schema";
-import { buildMentorPayload, buildRejectionReason, MentorOffer } from "helpers/datafactory/mentor.factory";
+import {
+	buildCalendlyLink,
+	buildMentorPayload,
+	buildRejectionReason,
+	MentorOffer,
+} from "helpers/datafactory/mentor.factory";
 
 export class MentorService {
 	constructor(private readonly client: MentorClient) {}
@@ -14,6 +19,22 @@ export class MentorService {
 	/** Registers a mentor offering the given mentorship types (default: long-term only) */
 	async registerWithOffer(offer: MentorOffer, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
 		const payload = buildMentorPayload(offer);
+		const response = await this.client.register(payload);
+		if (ensureSuccess) assertSuccess(response);
+		return response;
+	}
+
+	/** Registers a mentor that also has a calendlyLink (a member-level field) */
+	async registerWithCalendlyLink(ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
+		const payload = { ...buildMentorPayload(), calendlyLink: buildCalendlyLink() };
+		const response = await this.client.register(payload);
+		if (ensureSuccess) assertSuccess(response);
+		return response;
+	}
+
+	/** Re-register an existing email with fresh data and no member-level fields */
+	async reRegister(email: string, ensureSuccess = false): Promise<TypedAPIResponse<MentorResponse>> {
+		const payload = { ...buildMentorPayload(), email };
 		const response = await this.client.register(payload);
 		if (ensureSuccess) assertSuccess(response);
 		return response;

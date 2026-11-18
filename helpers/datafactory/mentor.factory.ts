@@ -2,7 +2,9 @@ import { faker } from "@faker-js/faker";
 import { Month } from "helpers/datafactory/constants/cycle.data";
 import { MIN_LONG_TERM_HOURS_PER_MENTEE, MAX_REJECTION_REASON_LENGTH } from "helpers/datafactory/constants/mentor.data";
 
-export type MentorPayload = ReturnType<typeof buildMentorPayload>;
+export type MentorPayload = ReturnType<typeof buildMentorPayload> & { calendlyLink?: string };
+
+export const buildCalendlyLink = () => `https://calendly.com/${faker.internet.username().toLowerCase()}`;
 
 export type AdHocAvailability = { month: Month; hours: number };
 
