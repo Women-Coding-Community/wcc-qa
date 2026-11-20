@@ -62,9 +62,15 @@ jobs:
         working-directory: wcc-qa
         run: npm ci
 
+      - name: Install Playwright system dependencies
+        working-directory: wcc-qa
+        timeout-minutes: 10
+        run: npx playwright install-deps webkit
+
       - name: Install Playwright browser (admin project runs on Desktop Safari)
         working-directory: wcc-qa
-        run: npx playwright install --with-deps webkit
+        timeout-minutes: 10
+        run: npx playwright install webkit
 
       - name: Build the stack images
         working-directory: wcc-backend
