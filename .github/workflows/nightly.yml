@@ -35,7 +35,7 @@ jobs:
   nightly:
     # Forks don't run the schedule; they can still trigger it manually.
     if: github.event_name == 'workflow_dispatch' || github.repository == 'Women-Coding-Community/wcc-qa'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
 
     steps:
@@ -54,7 +54,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 24
           cache: npm
           cache-dependency-path: wcc-qa/package-lock.json
 
@@ -62,9 +62,15 @@ jobs:
         working-directory: wcc-qa
         run: npm ci
 
+      - name: Install Playwright system dependencies
+        working-directory: wcc-qa
+        timeout-minutes: 10
+        run: npx playwright install-deps webkit
+
       - name: Install Playwright browser (admin project runs on Desktop Safari)
         working-directory: wcc-qa
-        run: npx playwright install --with-deps webkit
+        timeout-minutes: 10
+        run: npx playwright install webkit
 
       - name: Build the stack images
         working-directory: wcc-backend
