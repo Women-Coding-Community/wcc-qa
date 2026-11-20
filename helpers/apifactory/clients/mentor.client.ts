@@ -20,4 +20,12 @@ export class MentorClient {
 	accept(id: number): Promise<APIResponse> {
 		return this.request.patch(`${PlatformEndpoints.MENTORS}/${id}/accept`);
 	}
+
+	reject(id: number, body: { reason: string }): Promise<APIResponse> {
+		return this.request.patch(`${PlatformEndpoints.MENTORS}/${id}/reject`, { data: body });
+	}
+
+	update(id: number, payload: MentorPayload): Promise<APIResponse> {
+		return this.request.put(`${PlatformEndpoints.MENTORS}/${id}`, { data: payload });
+	}
 }

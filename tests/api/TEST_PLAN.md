@@ -54,6 +54,51 @@ Role matrix only — missing API key and invalid token are asserted once in the 
 
 ---
 
+## Mentor — Reject
+
+**File:** `tests/api/tests/platform/mentor.reject.flow.spec.ts`
+
+Rejected by `mentorshipAdminApi` (the narrowest role with MENTOR_APPROVE); the service generates the reason.
+The reason is not echoed in the response (it goes into the rejection email).
+
+| ID         | Title                                                            | Endpoint                                                       | Expected Result                                                                      |
+| ---------- | ---------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| MENTOR-R01 | Rejecting a pending mentor sets profileStatus to REJECTED        | `PATCH /api/platform/v1/mentors/{id}/reject`                   | 200, `profileStatus = REJECTED`                                                      |
+| MENTOR-R02 | Rejecting an active mentor removes them from the public CMS list | `PATCH .../{id}/reject` → `GET /api/cms/v1/mentorship/mentors` | 200, mentor present before the reject, absent after                                  |
+| MENTOR-R03 | Rejecting an already-rejected mentor returns 409                 | `PATCH /api/platform/v1/mentors/{id}/reject`                   | 409                                                                                  |
+| MENTOR-R04 | Rejecting as a mentor returns 403 and leaves the mentor PENDING  | `PATCH /api/platform/v1/mentors/{id}/reject`                   | 403, `getById` still `profileStatus = PENDING`                                       |
+| MENTOR-R05 | Rejecting with a blank reason returns 400                        | `PATCH /api/platform/v1/mentors/{id}/reject`                   | 400 — **skipped**: backend returns 200 (`@Valid` missing on the request body, FIXME) |
+
+---
+
+## Mentor — Update
+
+**File:** `tests/api/tests/platform/mentor.update.flow.spec.ts`
+
+Every mentor in this file is registered with a `calendlyLink`, so U02 has a member-level field to preserve.
+
+| ID         | Title                                                                                   | Endpoint                                         | Expected Result                                                                                        |
+| ---------- | --------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| MENTOR-U01 | Updating a mentor persists the changed fields                                           | `PUT /api/platform/v1/mentors/{id}`              | 200, `bio` changed; `getById` returns the updated `bio`                                                |
+| MENTOR-U02 | Re-registering an existing email keeps member-level fields and applies the changed ones | `POST /api/platform/v1/mentors` (existing email) | 201, same `id`, `bio` changed, `calendlyLink` kept — **skipped**: backend wipes `calendlyLink` (FIXME) |
+
+---
+
+## Mentor — Ad-hoc Availability
+
+**File:** `tests/api/tests/platform/mentor.adhoc.flow.spec.ts`
+
+`@ad-hoc`: runs in the ad-hoc phase, whose setup opens the ad-hoc cycle. The backend applies the cycle-month
+filter to `menteeSection.adHoc` only when the public page is requested with `?mentorshipTypes=Ad-Hoc`; the
+unfiltered page lists every active mentor, so both tests read the filtered page.
+
+| ID         | Title                                                                            | Endpoint                                                    | Expected Result                                                        |
+| ---------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------- |
+| MENTOR-U03 | An ad-hoc mentor available in the cycle month appears on the public list         | `GET /api/cms/v1/mentorship/mentors?mentorshipTypes=Ad-Hoc` | 200, mentor present, `adHoc` contains `{ month: <cycleMonth>, hours }` |
+| MENTOR-U04 | An ad-hoc mentor not available in the cycle month is absent from the public list | `GET /api/cms/v1/mentorship/mentors?mentorshipTypes=Ad-Hoc` | 200, mentor absent                                                     |
+
+---
+
 ## Mentorship Cycles
 
 **File:** `tests/api/tests/platform/cycle.get.flow.spec.ts`
