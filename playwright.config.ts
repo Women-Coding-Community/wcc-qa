@@ -4,7 +4,7 @@ import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "tests/.env"), quiet: true });
 
-/** Shared by the admin project and the setup project that logs its roles in. */
+/** Shared by the admin reachability, login setup, and admin test projects. */
 const adminUse = {
 	...devices["Desktop Safari"],
 	baseURL: process.env.ADMIN_BASE_URL || "http://localhost:3000",
@@ -14,7 +14,8 @@ const adminUse = {
  * Projects — two phases, because the Docker stack has one mentorship cycle open at a time:
  *
  *   base phase (long-term, as seeded)     every test NOT tagged @ad-hoc
- *     setup          logs every role into the admin portal and saves the sessions (tests/admin/setup.ts)
+ *     admin_reachability  verifies the login route is available before setup
+ *     setup          logs every role into the admin portal and saves the sessions; depends on admin_reachability
  *     api            needs only the backend
  *     admin          needs the backend + admin portal; depends on setup
  *
@@ -43,9 +44,17 @@ export default defineConfig({
 	projects: [
 		// ── base phase ──────────────────────────────────────────────────────────────
 		{
+			name: "admin_reachability",
+			testMatch: /admin\/reachability\.setup\.ts/,
+			use: adminUse,
+			// Missing frontend is an environment failure; report it once.
+			retries: 0,
+		},
+		{
 			name: "setup",
 			testMatch: /admin\/setup\.ts/,
 			use: adminUse,
+			dependencies: ["admin_reachability"],
 		},
 		{
 			name: "api",
